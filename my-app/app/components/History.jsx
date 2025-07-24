@@ -1,5 +1,7 @@
 "use client";
 import React, { useEffect, useState } from 'react';
+import { IoHomeOutline } from "react-icons/io5";
+import { RiChatNewLine } from "react-icons/ri";
 import Link from 'next/link';
 
 const History = () => {
@@ -28,11 +30,11 @@ const History = () => {
     <div className="bg-white/10 backdrop-blur-lg border-white/30 shadow-lg p-4 h-[550px] w-[170px] rounded-2xl ml-6 text-white flex flex-col">
       <div className="mb-4 flex flex-col gap-2">
         <h1 className="text-[12px] font-semibold mb-2 opacity-70">MAIN MENU</h1>
-        <Link href="/" className="block text-sm mb-1 hover:text-gray-300 transition-colors">
-          Home
+        <Link href="/" className=" text-sm mb-1 flex  items-center gap-3 hover:text-gray-300 transition-colors">
+           <IoHomeOutline /> Home
         </Link>
-        <Link href="/workspace/new" className="block text-sm hover:text-gray-300 transition-colors">
-          New Chat
+        <Link href="/workspace/new" className="flex items-center gap-3 text-sm hover:text-gray-300 transition-colors">
+          <RiChatNewLine /> New Chat
         </Link>
       </div>
 

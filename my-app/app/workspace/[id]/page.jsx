@@ -28,13 +28,13 @@ export default function WorkspacePage({ params }) {
     }, [id]);
 
     return (
-        <div className="relative h-screen w-full overflow-hidden text-white">
+        <div className="relative h-screen w-full overflow-hidden bg-black text-white">
             {/* Background Image */}
             <Image
                 src="/pexels-dariuskrs-2609107.jpg"
                 alt="Background"
-                layout="fill"
-                objectFit="cover"
+                fill
+                style={{ objectFit: 'cover' }}
                 className="z-0"
             />
 
@@ -44,7 +44,7 @@ export default function WorkspacePage({ params }) {
             {/* Foreground Content */}
             <div className="relative z-20 h-full w-full flex flex-col">
                 <h1 className="p-3 text-2xl font-bold text-center">Velociti</h1>
-                <div className="flex-1 flex gap-4 p-4">
+                <div className="flex-1 flex  p-4">
                     <History topic={idea} /> {/* History component receives topic */}
                     {/* Pass both 'id' and 'initialIdea' to the Code component */}
                     <Code id={id} initialIdea={idea} /> {/* <--- CRUCIAL CHANGE HERE */}

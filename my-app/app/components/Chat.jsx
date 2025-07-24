@@ -130,7 +130,7 @@ const Chat = ({ id, initialIdea }) => {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-100px)] w-[370px] bg-white/10 backdrop-blur-lg rounded-2xl shadow-lg border-white/20 text-foreground">
+    <div className="flex flex-col h-[calc(100vh-100px)] w-[300px] bg-white/10 backdrop-blur-lg rounded-2xl shadow-lg border-white/20 text-foreground">
       {/* Chat Messages Display Area */}
       <div className="flex-grow overflow-y-auto scrollbar-hide  p-4 space-y-3">
         {messages.map((msg) => (
@@ -168,7 +168,7 @@ const Chat = ({ id, initialIdea }) => {
                     style={{ animationDelay: "0.2s" }}
                   ></div>
                 </div>
-                <span className="text-sm text-muted-foreground">
+                <span className="text-sm text-muted-foreground mr-7">
                   AI is thinking...
                 </span>
               </div>

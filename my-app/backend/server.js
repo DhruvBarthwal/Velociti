@@ -13,11 +13,17 @@ import "./auth/google.js"; // Important to load Passport strategy (contains Goog
 
 // Import AI generation specific modules
 import { generateAIResponse} from './service/AIModel.js' ; // Adjust path relative to server.js
-import CHAT_PROMPT from './data/Prompt.js'; // <--- CHANGED THIS IMPORT
+// Import both CHAT_PROMPT and CODE_PROMPT from the same file using a relative path
+import { CHAT_PROMPT, CODE_PROMPT } from './data/Prompt.js';
 
 dotenv.config();
 
 const app = express();
+
+// --- DEBUG LOGS FOR PROMPTS ---
+console.log("DEBUG: CHAT_PROMPT imported:", CHAT_PROMPT);
+console.log("DEBUG: CODE_PROMPT imported:", CODE_PROMPT);
+// --- END DEBUG LOGS ---
 
 // --- Middlewares ---
 app.use(express.json()); // To parse JSON request bodies
@@ -66,7 +72,7 @@ app.get("/auth/logout", (req, res, next) => {
   });
 });
 
-// --- AI Chat API Route (NEWLY ADDED) ---
+// --- AI Chat API Route ---
 app.post('/api/chat', async (req, res) => {
   try {
     const { chatHistory } = req.body;
@@ -77,29 +83,18 @@ app.post('/api/chat', async (req, res) => {
 
     console.log("📨 Received chat history:", chatHistory);
 
-    // Normalize roles: map 'ai' to 'model', force roles to 'user' or 'model' only
-    const normalizedChatHistory = chatHistory.map(msg => {
-      let role = msg.role.toLowerCase();
-      if (role === 'ai') role = 'model';
-      else if (role !== 'user' && role !== 'model') role = 'user'; // fallback
-
-      // Flatten parts array to a single text string
-      const content = msg.parts?.map(part => part.text).join(' ') || '';
-
-      return { role, parts: [{ text: content }] };
-    });
-
-    // Call the AI with normalized chat history
-    const aiResponseText = await generateAIResponse(normalizedChatHistory, CHAT_PROMPT.CHAT_PROMPT);
+    // Use the CHAT_PROMPT for chat responses
+    const aiResponseText = await generateAIResponse(chatHistory, CHAT_PROMPT);
 
     console.log("🤖 AI response:", aiResponseText);
 
-    // Prepare full messages for DB saving with normalized role and full text
-    const fullMessages = normalizedChatHistory.map(msg => ({
+    // Correctly map chatHistory to { role, content } format for DB save
+    const fullMessages = chatHistory.map(msg => ({
       role: msg.role,
-      content: msg.parts?.[0]?.text || '',
+      content: msg.parts?.[0]?.text || "",
     }));
 
+    // Add AI model response as last message
     fullMessages.push({
       role: 'model',
       content: aiResponseText,
@@ -120,7 +115,66 @@ app.post('/api/chat', async (req, res) => {
   }
 });
 
+// --- AI Code Generation API Route ---
+app.post('/api/generate-code', async (req, res) => {
+  try {
+    const { topic } = req.body;
 
+    if (!topic || typeof topic !== 'string') {
+      return res.status(400).json({ message: 'Topic must be a valid string.' });
+    }
+
+    console.log("🛠️ Received code generation request for topic:", topic);
+
+    // Prepare the prompt for code generation
+    const codeGenerationChatHistory = [
+      {
+        role: 'user',
+        parts: [{ text: CODE_PROMPT + `\n\nUser Request: ${topic}` }]
+      }
+    ];
+
+    // Call the AI generation function. It should return a JSON string.
+    let aiResponseJsonString = await generateAIResponse(codeGenerationChatHistory, ""); // Empty system prompt as it's in the history
+
+    if (!aiResponseJsonString) {
+      return res.status(500).json({ message: 'Empty response from AI model.' });
+    }
+
+    // --- NEW: Pre-process AI response to remove markdown code block wrappers ---
+    // This is crucial if the AI still includes ```json and ```
+    if (aiResponseJsonString.startsWith('```json')) {
+        aiResponseJsonString = aiResponseJsonString.substring('```json'.length);
+        if (aiResponseJsonString.endsWith('```')) {
+            aiResponseJsonString = aiResponseJsonString.substring(0, aiResponseJsonString.length - '```'.length);
+        }
+        // Trim any leading/trailing whitespace or newlines that might remain
+        aiResponseJsonString = aiResponseJsonString.trim();
+    }
+    // --- END NEW PRE-PROCESSING ---
+
+    // Parse the JSON string received from the AI
+    const generatedCode = JSON.parse(aiResponseJsonString);
+
+    // Assuming AI returns { files: { '/App.js': '...', ... } }
+    if (generatedCode && generatedCode.files && typeof generatedCode.files === 'object') {
+      res.json({ files: generatedCode.files });
+    } else {
+      // Log the raw AI response for debugging if parsing fails
+      console.error('AI did not return code in the expected JSON format:', aiResponseJsonString);
+      throw new Error('AI did not return code in the expected JSON format (missing "files" property or malformed JSON).');
+    }
+
+  } catch (error) {
+    console.error('❌ Backend /api/generate-code error:', error);
+    // Provide a more specific error if JSON parsing failed
+    if (error instanceof SyntaxError) {
+        res.status(500).json({ message: 'Code generation failed: AI response was not valid JSON.', error: error.message });
+    } else {
+        res.status(500).json({ message: 'Code generation failed.', error: error.message });
+    }
+  }
+});
 
 
 app.get('/api/chat/:sessionId', async (req, res) => {

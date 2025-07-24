@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@codesandbox/sandpack-react": "^2.20.0",
     "@google/genai": "^1.11.0",
     "@radix-ui/react-dialog": "^1.1.14",
     "autoprefixer": "^10.4.21",

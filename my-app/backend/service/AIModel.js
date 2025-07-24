@@ -18,31 +18,47 @@ export async function generateAIResponse(chatHistory, systemPrompt) {
   try {
     const aiModel = genAI.getGenerativeModel({ model: modelName });
 
-    // --- ENHANCED DEBUG LOG ADDED HERE ---
+    // --- DEBUG LOG: Verify systemPrompt value ---
     console.log("System Prompt received by generateAIResponse:", systemPrompt);
-    // --- END ENHANCED DEBUG LOG ---
+    // --- END DEBUG LOG ---
 
     // Construct the full conversation history for the AI model
     // Ensure each part has a 'text' field for text-based messages
-    const contentsForAI = [
-      {
-        role: 'user',
-        parts: [{ text: systemPrompt }] // System prompt as a user part
-      },
-      {
-        role: 'model',
-        parts: [{ text: "Okay, I'm ready to assist you with React development ideas!" }] // AI's initial acknowledgment
-      },
-      // Map the chatHistory from frontend to the correct format for Gemini
-      ...chatHistory.map(message => ({
-        role: message.role, // 'user' or 'ai' (model)
-        parts: message.parts.map(part => ({
-          text: part.text // Ensure 'text' property is used for text content
-        }))
-      }))
-    ];
+    const contentsForAI = [];
 
-    // --- DEBUG LOG (already present) ---
+    // Add the system prompt as the first 'user' turn if it exists
+    // This is the critical part to ensure the system prompt is correctly formatted
+    if (systemPrompt) {
+      contentsForAI.push({
+        role: 'user',
+        parts: [{ text: systemPrompt }] // <--- THIS IS THE CRITICAL LINE
+      });
+      // Add a model response to balance the conversation if a system prompt is used
+      // This helps Gemini understand the turn-taking.
+      contentsForAI.push({
+        role: 'model',
+        parts: [{ text: "Okay, I'm ready to assist you!" }]
+      });
+    }
+
+
+    // Map the chatHistory from frontend to the correct format for Gemini
+    // Ensure roles are 'user' or 'model' and parts have 'text'
+    chatHistory.forEach(message => {
+      let role = message.role.toLowerCase();
+      if (role === 'ai') role = 'model'; // Normalize 'ai' to 'model'
+      else if (role !== 'user' && role !== 'model') role = 'user'; // Fallback for unexpected roles
+
+      // Ensure parts are correctly formatted with 'text'
+      const parts = message.parts.map(part => ({
+        text: part.text || '' // Use text property, fallback to empty string
+      }));
+
+      contentsForAI.push({ role, parts });
+    });
+
+
+    // --- DEBUG LOG: Show final payload to Gemini ---
     console.log("Contents sent to Gemini API:", JSON.stringify(contentsForAI, null, 2));
     // --- END DEBUG LOG ---
 
