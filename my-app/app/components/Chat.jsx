@@ -1,11 +1,11 @@
-"use client"; // This component needs client-side functionality
-
+// app/components/Chat.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { GrSend } from "react-icons/gr"; // Assuming you have react-icons installed
 import { nanoid } from "nanoid"; // For generating unique message IDs
 
 // This component will receive the 'id' of the workspace and the 'initialIdea' (topic)
-const Chat = ({ id, initialIdea }) => {
+const Chat = ({ id, initialIdea, onNewUserMessageForCode }) => {
+  // <--- Added onNewUserMessageForCode prop
   // State to store all chat messages
   // Each message will be an object: { id: string, role: 'user' | 'model', text: string }
   const [messages, setMessages] = useState([]);
@@ -19,24 +19,59 @@ const Chat = ({ id, initialIdea }) => {
 
   // --- Local Storage Persistence ---
   useEffect(() => {
-    // Load chat history from local storage when the component mounts or id changes
     const storedChat = localStorage.getItem(`chat-history-${id}`);
+    let initialMessages = [];
+    let shouldSendMessageToAI = false;
+
     if (storedChat) {
       try {
-        setMessages(JSON.parse(storedChat));
+        initialMessages = JSON.parse(storedChat);
+        setMessages(initialMessages);
       } catch (e) {
         console.error("Failed to parse stored chat history:", e);
-        // If parsing fails, start with the initial idea
-        setMessages(
-          initialIdea ? [{ id: nanoid(), role: "user", text: initialIdea }] : []
-        );
+        // If parsing fails, treat as no stored chat
+        initialMessages = [];
       }
-    } else if (initialIdea) {
-      // If no stored chat and an initial idea is provided, start with that idea
-      setMessages([{ id: nanoid(), role: "user", text: initialIdea }]);
-    } else {
-      // If no stored chat and no initial idea, start with an empty chat
-      setMessages([]);
+    }
+
+    // If no messages were loaded from storage AND there's a valid initialIdea,
+    // then this is either a brand new chat or a corrupted one.
+    // In this case, we'll start the conversation with the initialIdea.
+    if (
+      initialMessages.length === 0 &&
+      initialIdea &&
+      initialIdea !== "Idea not found."
+    ) {
+      const firstUserMessage = {
+        id: nanoid(),
+        role: "user",
+        text: initialIdea,
+      };
+      setMessages([firstUserMessage]);
+      shouldSendMessageToAI = true; // Flag to send this message to AI
+    } else if (initialMessages.length > 0) {
+      // If messages were loaded, ensure the 'userRequestForCode' is also set for the editor
+      // This handles cases where the page is refreshed and the editor needs the last user prompt
+      const lastUserMessage = initialMessages
+        .slice()
+        .reverse()
+        .find((msg) => msg.role === "user");
+      if (lastUserMessage && onNewUserMessageForCode) {
+        onNewUserMessageForCode(lastUserMessage.text);
+      }
+    }
+
+    // If the flag is set, send the initial idea to the AI
+    if (shouldSendMessageToAI) {
+      // Use a timeout to ensure state update (setMessages) is processed before AI call
+      // and to prevent this from blocking the initial render.
+      setTimeout(() => {
+        sendMessageToAI(initialIdea);
+        // Also send this initial idea to the code editor
+        if (onNewUserMessageForCode) {
+          onNewUserMessageForCode(initialIdea);
+        }
+      }, 0);
     }
   }, [id, initialIdea]); // Re-run if workspace ID or initial idea changes
 
@@ -64,7 +99,12 @@ const Chat = ({ id, initialIdea }) => {
         parts: [{ text: msg.text }],
       }));
       // Add the current user message to the history for the AI call
-      chatHistory.push({ role: "user", parts: [{ text: userMessage }] });
+      // Ensure it's not duplicated if it's the initial message already added to state
+      if (
+        !messages.some((msg) => msg.text === userMessage && msg.role === "user")
+      ) {
+        chatHistory.push({ role: "user", parts: [{ text: userMessage }] });
+      }
 
       // Call your backend API endpoint to get AI response
       const response = await fetch("http://localhost:5000/api/chat", {
@@ -88,7 +128,7 @@ const Chat = ({ id, initialIdea }) => {
 
       setMessages((prevMessages) => [
         ...prevMessages,
-        { id: nanoid(), role: "model", text: aiResponseText }, // <--- CHANGED ROLE FROM 'ai' TO 'model'
+        { id: nanoid(), role: "model", text: aiResponseText },
       ]);
     } catch (error) {
       console.error("Error sending message to AI:", error);
@@ -98,7 +138,7 @@ const Chat = ({ id, initialIdea }) => {
           id: nanoid(),
           role: "model",
           text: "Oops! I couldn't get a response right now. Please try again.",
-        }, // <--- CHANGED ROLE FROM 'ai' TO 'model'
+        },
       ]);
     } finally {
       setIsGenerating(false);
@@ -117,6 +157,11 @@ const Chat = ({ id, initialIdea }) => {
     ]);
     setInput(""); // Clear input field
 
+    // Call the prop function with the user's message for code generation
+    if (onNewUserMessageForCode) {
+      onNewUserMessageForCode(userMessage); // Pass the user's message here
+    }
+
     // Send the message to the AI backend
     await sendMessageToAI(userMessage);
   };
@@ -132,7 +177,7 @@ const Chat = ({ id, initialIdea }) => {
   return (
     <div className="flex flex-col h-[calc(100vh-100px)] w-[300px] bg-white/10 backdrop-blur-lg rounded-2xl shadow-lg border-white/20 text-foreground">
       {/* Chat Messages Display Area */}
-      <div className="flex-grow overflow-y-auto scrollbar-hide  p-4 space-y-3">
+      <div className="flex-grow overflow-y-auto scrollbar-hide p-4 space-y-3">
         {messages.map((msg) => (
           <div
             key={msg.id}
@@ -141,10 +186,10 @@ const Chat = ({ id, initialIdea }) => {
             } mb-4`}
           >
             <div
-              className={`max-w-[85%] px-4 py-3 rounded-2xl shadow-sm ${
+              className={`px-4 py-3 rounded-2xl shadow-sm ${
                 msg.role === "user"
-                  ? "bg-green-600 text-primary-foreground ml-12"
-                  : "bg-card text-card-foreground border border-border mr-12"
+                  ? "bg-green-600 text-primary-foreground ml-12 max-w-[85%]"
+                  : "bg-card text-card-foreground border border-border w-full mr-0"
               }`}
             >
               <div className="text-sm leading-relaxed whitespace-pre-wrap font-medium">
@@ -186,7 +231,7 @@ const Chat = ({ id, initialIdea }) => {
             isGenerating ? "AI is thinking..." : "Type your message..."
           }
           value={input}
-          onChange={(e) => setInput(e.target.value)} 
+          onChange={(e) => setInput(e.target.value)}
           onKeyPress={handleKeyPress}
           rows={1} // Start with one row
           style={{ maxHeight: "100px" }} // Max height for textarea

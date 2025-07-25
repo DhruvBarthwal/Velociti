@@ -6,7 +6,7 @@ import {
   SandpackLayout,
   SandpackCodeEditor,
   SandpackPreview,
-  useSandpack, // To programmatically update files
+  // useSandpack, // Not directly used in this component, can be removed if not needed elsewhere
 } from '@codesandbox/sandpack-react';
 
 // Import icons from lucide-react
@@ -96,12 +96,12 @@ li {
   },
 };
 
-const CodeEditor = ({ topic }) => {
+// CodeEditor now accepts 'showCode' as a prop
+const CodeEditor = ({ topic, showCode }) => { // <--- showCode is now a prop
   const [generatedCodeFiles, setGeneratedCodeFiles] = useState(null);
   const [isLoadingCode, setIsLoadingCode] = useState(false);
   const [codeError, setCodeError] = useState(null);
-  // State for toggling between code editor and preview
-  const [showCode, setShowCode] = useState(true); // true for code, false for preview
+  // Removed showCode state from here, as it's now a prop
 
   // --- DEBUG LOG: Topic prop received by CodeEditor ---
   console.log("CodeEditor: Topic prop received:", topic);
@@ -209,24 +209,16 @@ const CodeEditor = ({ topic }) => {
   }
 
   return (
-    <div className="flex-1 h-full relative"> {/* Make this container relative for absolute positioning */}
-      <div className="absolute right-0 z-30 flex rounded-[10px] overflow-hidden shadow-lg"> {/* Single button container */}
-        <button
-          onClick={() => setShowCode(!showCode)} // Toggle showCode state
-          className="p-3 bg-zinc-700 text-white rounded-[6px] transition-colors duration-300 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-        >
-          {showCode ? <Eye size={15} /> : <Code size={15} />} {/* Conditional icon */}
-        </button>
-      </div>
-      <div className="flex-1 overflow-hidden rounded-lg"> {/* Add padding-top to account for button */}
+    <div className="flex-1 h-full relative"> {/* Main container, relative for absolute button */}
+      {/* The toggle button is now handled by the parent Code.jsx */}
+      <div className="flex-1 overflow-hidden rounded-lg h-full w-full">
         <SandpackProvider template="react" files={generatedCodeFiles} theme="dark">
-          <SandpackLayout>
+          <SandpackLayout className="flex-1 h-full w-full">
             {/* Conditionally render CodeEditor or Preview with transitions */}
-            {/* Added overflow-x-auto to ensure horizontal scrolling for code editor */}
-            <div className={`transition-opacity h-[530px] w-full duration-500 ${showCode ? 'opacity-100 block' : 'opacity-0 hidden'} overflow-x-auto`}>
+            <div className={`transition-opacity flex-1  w-full duration-500 ${showCode ? 'opacity-100 block' : 'opacity-0 hidden'} overflow-x-auto overflow-y-auto`}>
               <SandpackCodeEditor className='h-full' />
             </div>
-            <div className={`transition-opacity h-[530px] w-full rounded-[10px] duration-500 ${!showCode ? 'opacity-100 block' : 'opacity-0 hidden'}`}>
+            <div className={`transition-opacity h-[530px] w-full rounded-[10px] duration-500 ${!showCode ? 'opacity-100 block' : 'opacity-0 hidden'} overflow-y-auto`}>
               <SandpackPreview className='h-full' />
             </div>
           </SandpackLayout>

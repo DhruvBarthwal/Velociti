@@ -1,17 +1,58 @@
-import React from 'react';
-import Chat from './Chat'; // Assuming Chat.jsx is in the same directory
-import CodeEditor from './CodeEditor'; // Assuming CodeEditor.jsx is in the same directory
+import React, { useState } from 'react';
+import Chat from './Chat';
+import CodeEditor from './CodeEditor';
 
-// Code component now accepts 'id' and 'initialIdea' as props
-const Code = ({ id, initialIdea }) => { // <--- Updated to accept 'id' and 'initialIdea'
+const Code = ({ id, initialIdea }) => {
+  const [showCode, setShowCode] = useState(true); // State for toggling code/preview view
+  // New state to hold the user's request for code generation
+  // Initialize with initialIdea if it's a valid string, otherwise empty
+  const [userRequestForCode, setUserRequestForCode] = useState(
+    initialIdea && initialIdea !== 'Idea not found.' ? initialIdea : ''
+  );
+
+  // Function to be passed to Chat.jsx to update the code generation topic
+  const handleNewUserMessageForCode = (messageText) => {
+    // Only update if the message is from the user and has content
+    if (messageText && messageText.trim() !== '') {
+      setUserRequestForCode(messageText);
+    }
+  };
+
   return (
-    <div className='bg-white/10 backdrop-blur-2xl flex gap-4 p-3 h-[550px] w-[1090px] rounded-[12px] ml-6 '>
-        {/* Pass 'id' and 'initialIdea' down to the Chat component */}
-        <Chat id={id} initialIdea={initialIdea}/> {/* <--- Props passed to Chat */}
-        {/* Pass 'initialIdea' (or 'topic') to CodeEditor if it needs it */}
-        <CodeEditor topic={initialIdea}/> {/* <--- Props passed to CodeEditor */}
+    <div className='bg-white/10 backdrop-blur-2xl flex gap-4 p-3 h-[550px] w-[1060px] rounded-[12px] ml-6'>
+      {/* Pass the new handler to Chat component */}
+      <Chat
+        id={id}
+        initialIdea={initialIdea}
+        onNewUserMessageForCode={handleNewUserMessageForCode} // <--- NEW PROP
+      />
+
+      {/* Container for CodeEditor with a fixed width */}
+      <div className="flex flex-col relative w-[694px]">
+        {/* Toggle buttons for Code/Preview view */}
+        <div className="absolute top-2 right-2 z-30 flex rounded-lg overflow-hidden opacity-0">
+          <button
+            onClick={() => setShowCode(true)}
+            className={`px-4 py-2 transition-all duration-300 ${
+              showCode ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+          >
+            Code
+          </button>
+          <button
+            onClick={() => setShowCode(false)}
+            className={`px-4 py-2 transition-all duration-300 ${
+              !showCode ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+          >
+            Preview
+          </button>
+        </div>
+        {/* Pass userRequestForCode as the topic prop to CodeEditor */}
+        <CodeEditor topic={userRequestForCode} showCode={showCode} /> {/* <--- UPDATED PROP */}
+      </div>
     </div>
-  )
-}
+  );
+};
 
 export default Code;

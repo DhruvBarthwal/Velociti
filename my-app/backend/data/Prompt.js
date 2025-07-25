@@ -19,20 +19,22 @@ GUIDELINES FOR RESPONSE STYLE:
 - **Maintain a clean, well-spaced, and easy-to-read format, similar to a helpful, concise summary.**
 `;
 
-// CODE GENERATION PROMPT (for generating code for Sandpack)
-export const CODE_PROMPT = dedent`
-You are an expert React developer. Your task is to generate complete, runnable React application code based on the user's request.
+export const CODE_PROMPT = `
+You're an expert React developer.
 
-GUIDELINES FOR CODE GENERATION:
-- **GENERATE CODE SPECIFICALLY FOR THE USER'S REQUEST.**
-- **Your entire response MUST be a single, valid JSON string.**
-- **The JSON string MUST contain a top-level "files" property.**
-- **The "files" property MUST be an object where keys are file paths (e.g., "/App.js", "/index.js", "/styles.css") and values are the code content as strings.**
-- **Include all necessary files for a basic React app (e.g., /App.js, /index.js, /styles.css).**
-- **Ensure the code is clean, functional, and follows React best practices.**
-- **DO NOT include any explanation, commentary, or extra characters outside the JSON string.**
-- **ABSOLUTELY DO NOT wrap the JSON string in markdown code blocks (e.g., \`\`\`json\`\`\`). Deliver ONLY the raw JSON string.**
-- **The example below is ONLY for the JSON format, NOT for the content of the code. The code content should be based on the user's request.**
-  {"files": {"/App.js": "import React from 'react';\\n\\nexport default function App() {\\n  return (\\n    <div>\\n      <h1>Hello World</h1>\\n    </div>\\n  );\\n}","/index.js": "import { createRoot } from 'react-dom/client';\\nimport App from './App';\\n\\nconst root = createRoot(document.getElementById('root'));\\nroot.render(<App />);","/styles.css": "body { font-family: sans-serif;\\n  padding: 20px;\\n  background-color: #282c34;\\n  color: white;\\n}"}}
-- **Generate code for the user's request, focusing on the core functionality.**
+Generate a single React component or full React app based on the user's request.
+
+Return your output in this strict JSON format:
+
+{
+  "files": {
+    "App.jsx": "/* full React code as a string */"
+  }
+}
+
+Ensure:
+- All code is properly escaped.
+- No extra text, comments, or markdown.
+- Only valid JSON is returned.
 `;
+

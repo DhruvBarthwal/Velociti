@@ -2,6 +2,7 @@
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import 'dotenv/config';
+import { CHAT_PROMPT, CODE_PROMPT } from '../data/Prompt.js'; // Unified CODE_PROMPT
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
@@ -11,71 +12,45 @@ const tools = [
   },
 ];
 
-const generationConfig = {};
+const baseGenerationConfig = {
+  temperature: 0.1,
+  topP: 0.9,
+  topK: 40,
+  maxOutputTokens: 8192, // Increased maxOutputTokens to allow for longer code generation
+};
+
 const modelName = 'gemini-2.0-flash';
 
 export async function generateAIResponse(chatHistory, systemPrompt) {
   try {
-    const aiModel = genAI.getGenerativeModel({ model: modelName });
+    const isCodeGenerationRequest = systemPrompt === CODE_PROMPT;
 
-    // --- DEBUG LOG: Verify systemPrompt value ---
-    console.log("System Prompt received by generateAIResponse:", systemPrompt);
-    // --- END DEBUG LOG ---
-
-    // Construct the full conversation history for the AI model
-    // Ensure each part has a 'text' field for text-based messages
-    const contentsForAI = [];
-
-    // Add the system prompt as the first 'user' turn if it exists
-    // This is the critical part to ensure the system prompt is correctly formatted
-    if (systemPrompt) {
-      contentsForAI.push({
-        role: 'user',
-        parts: [{ text: systemPrompt }] // <--- THIS IS THE CRITICAL LINE
-      });
-      // Add a model response to balance the conversation if a system prompt is used
-      // This helps Gemini understand the turn-taking.
-      contentsForAI.push({
-        role: 'model',
-        parts: [{ text: "Okay, I'm ready to assist you!" }]
-      });
+    const currentGenerationConfig = { ...baseGenerationConfig };
+    if (isCodeGenerationRequest) {
+      currentGenerationConfig.responseMimeType = "application/json";
     }
 
-
-    // Map the chatHistory from frontend to the correct format for Gemini
-    // Ensure roles are 'user' or 'model' and parts have 'text'
-    chatHistory.forEach(message => {
-      let role = message.role.toLowerCase();
-      if (role === 'ai') role = 'model'; // Normalize 'ai' to 'model'
-      else if (role !== 'user' && role !== 'model') role = 'user'; // Fallback for unexpected roles
-
-      // Ensure parts are correctly formatted with 'text'
-      const parts = message.parts.map(part => ({
-        text: part.text || '' // Use text property, fallback to empty string
-      }));
-
-      contentsForAI.push({ role, parts });
+    const model = genAI.getGenerativeModel({
+      model: modelName,
+      generationConfig: currentGenerationConfig,
+      systemInstruction: { role: 'system', parts: [{ text: systemPrompt }] }
     });
 
+    const contentsForAI = chatHistory;
 
-    // --- DEBUG LOG: Show final payload to Gemini ---
-    console.log("Contents sent to Gemini API:", JSON.stringify(contentsForAI, null, 2));
-    // --- END DEBUG LOG ---
-
-    const result = await aiModel.generateContent({
+    const result = await model.generateContent({
       contents: contentsForAI,
-      tools,
-      generationConfig,
+      tools
     });
 
     const response = await result.response;
     const text = response.text();
 
     return text;
-
   } catch (error) {
-    console.error('Error generating AI response:', error);
-    // Re-throw or return a specific error message to be handled by the calling route
+    console.error('❌ AI generation failed:', error);
     throw new Error(`AI generation failed: ${error.message}`);
   }
 }
+
+
