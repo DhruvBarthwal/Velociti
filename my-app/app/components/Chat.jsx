@@ -175,7 +175,7 @@ const Chat = ({ id, initialIdea, onNewUserMessageForCode }) => {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-100px)] w-[300px] bg-white/10 backdrop-blur-lg rounded-2xl shadow-lg border-white/20 text-foreground">
+    <div className="flex flex-col h-full w-[450px] bg-white/10 backdrop-blur-lg rounded-2xl shadow-lg border-white/20 text-foreground">
       {/* Chat Messages Display Area */}
       <div className="flex-grow overflow-y-auto scrollbar-hide p-4 space-y-3">
         {messages.map((msg) => (

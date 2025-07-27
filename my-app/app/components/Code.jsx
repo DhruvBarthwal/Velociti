@@ -19,7 +19,7 @@ const Code = ({ id, initialIdea }) => {
   };
 
   return (
-    <div className='bg-white/10 backdrop-blur-2xl flex gap-4 p-3 h-[550px] w-[1060px] rounded-[12px] ml-6'>
+    <div className='bg-white/10 backdrop-blur-2xl flex gap-4 p-3 h-[calc(100vh-100px)] w-full rounded-[12px] ml-6 mr-3 border border-white/30'>
       {/* Pass the new handler to Chat component */}
       <Chat
         id={id}
@@ -28,9 +28,9 @@ const Code = ({ id, initialIdea }) => {
       />
 
       {/* Container for CodeEditor with a fixed width */}
-      <div className="flex flex-col relative w-[694px]">
+      <div className="flex flex-col relative w-full">
         {/* Toggle buttons for Code/Preview view */}
-        <div className="absolute top-2 right-2 z-30 flex rounded-lg overflow-hidden opacity-0">
+        <div className="absolute top-2 right-2 z-30 flex rounded-lg overflow-hidden">
           <button
             onClick={() => setShowCode(true)}
             className={`px-4 py-2 transition-all duration-300 ${

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { nanoid } from "nanoid";
 import SigninDialog from "./SigninDialog";
 import { useUser } from "../context/UserProvider";
+import { useTypewriter, Cursor } from "react-simple-typewriter";
 
 const Hero = () => {
   const [loaded, setLoaded] = useState(false);
@@ -42,6 +43,11 @@ const Hero = () => {
     router.push(`/workspace/${id}`);
   };
 
+  const [random]= useTypewriter({
+    words: ['todo list ','budget tracker app','gym calories tracker'],
+    loop: {},
+  });
+
   // Determine if the send button should be enabled and what its style should be
   const isSendButtonEnabled = !loading && text.trim().length > 0;
   const sendButtonClass = `absolute bottom-2 right-2 p-3 cursor-pointer rounded-[10px] transition ${
@@ -51,31 +57,29 @@ const Hero = () => {
   }`;
 
   return (
-    <div className="h-full w-full pb-30 flex flex-col justify-center items-center">
+    <div className="h-full w-full pb-40 flex flex-col justify-center items-center">
       {/* Title */}
       <div
-        className={`flex flex-col items-center gap-3 text-center transition-all duration-700 ease-out ${
+        className={`flex flex-col items-center gap-3 mb-3 font-md leading-15 text-[70px] text-center transition-all duration-700 ease-out ${
           loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
         }`}
       >
-        <h1 className="text-3xl font-semibold">
-          What’s brewing in your mind today?
-        </h1>
-        <h1 className="text-[18px]">Build it now!</h1>
+        <h1>Build with a prompt</h1>
+        <h1 className="text-[30px]">Say it. Ship it.</h1>
       </div>
 
       {/* Textarea Box */}
       <div
-        className={`relative mt-6 w-[600px] h-[150px] bg-white/20 backdrop-blur-md rounded-[10px] py-3 pl-3 pr-3 shadow-md transition-all duration-700 ease-out ${
+        className={`relative mt-6 w-[600px] h-[60px] bg-white rounded-[12px] py-3 pl-3 pr-3 shadow-md transition-all duration-700 ease-out ${
           loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
         }`}
       >
         <textarea
-          placeholder={loading ? "Checking authentication..." : "Start typing your idea..."}
+          placeholder={loading ? "Checking authentication..." : `Create a ${random}`}
           value={text}
           disabled={loading} // Keep disabled while loading
           onChange={(e) => setText(e.target.value)}
-          className="w-full h-full bg-transparent outline-none text-white placeholder:text-white/70 resize-none custom-scroll disabled:opacity-50"
+          className="w-full h-full pt-1 bg-white text-black outline-none placeholder: resize-none custom-scroll placeholder:text-black placeholder:text-[17px]"
         />
 
         {/* Unified Send Button */}

@@ -9,3 +9,14 @@
   display: none; /* Chrome, Safari, Opera */
 }
 
+@font-face {
+  font-family: "Mona Sans";
+  src: url("/fonts/MonaSans/fonnts.com-Mona-Sans-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+body {
+  font-family: "Mona Sans", sans-serif;
+}

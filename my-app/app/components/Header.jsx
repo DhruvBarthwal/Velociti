@@ -2,6 +2,7 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "../context/UserProvider";
+import Image from "next/image";
 
 const Header = () => {
   const { user, loading, refreshUser } = useUser();
@@ -29,7 +30,7 @@ const Header = () => {
   return (
     <div className="flex justify-between p-5 items-center">
       <div>
-        <h1 className="text-2xl font-bold">Velociti</h1>
+        <h1 className="font-bold text-[30px]">Velociti</h1>
       </div>
 
       {loading ? (

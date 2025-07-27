@@ -34,7 +34,7 @@ app.use(
     saveUninitialized: false,
     cookie: {
       maxAge: 24 * 60 * 60 * 1000,
-      secure: process.env.NODE_ENV === 'production',
+      secure: false,
       httpOnly: true,
       sameSite: 'lax',
     },
@@ -45,6 +45,15 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use("/auth", authRoutes);
+
+// ✅ Add this route to return the current authenticated user
+app.get("/auth/me", (req, res) => {
+  if (req.isAuthenticated()) {
+    res.json(req.user);
+  } else {
+    res.status(401).json({ message: "Not logged in" });
+  }
+});
 
 app.get("/auth/logout", (req, res, next) => {
   req.logout((err) => {
@@ -65,7 +74,8 @@ app.post('/api/chat', async (req, res) => {
       return res.status(400).json({ message: 'Invalid chat history provided.' });
     }
 
-    const aiResponseText = String(await generateAIResponse(chatHistory, CHAT_PROMPT) || '');
+    // Pass false for isCodeRequestFlag for chat prompts
+    const aiResponseText = String(await generateAIResponse(chatHistory, CHAT_PROMPT, false) || '');
 
     const fullMessages = [...chatHistory.map(msg => ({
       role: msg.role,
@@ -96,32 +106,73 @@ app.post('/api/generate-code', async (req, res) => {
       return res.status(400).json({ message: 'Topic must be a valid string.' });
     }
 
-    const history = [{ role: 'user', parts: [{ text: CODE_PROMPT + `\n\nUser Request: ${topic}` }] }];
+    // Construct history for the AI call, ensuring the prompt is clear for code generation
+    const history = [{ role: 'user', parts: [{ text: `Generate React code for: ${topic}` }] }];
 
-    let aiResponse = String(await generateAIResponse(history, "") || '').trim();
-    if (aiResponse.startsWith('```json')) {
-      aiResponse = aiResponse.replace(/```json\n?/, '').replace(/```$/, '').trim();
+    // Pass true for isCodeRequestFlag for code generation prompts
+    let aiRawResponse = String(await generateAIResponse(history, CODE_PROMPT, true) || '').trim();
+    
+    let generatedFiles = {};
+    // Regex to capture Filename comments and the subsequent code block.
+    // It looks for:
+    // 1. Optional leading ```(language) (e.g., ```javascript)
+    // 2. // Filename: /path/to/file.ext
+    // 3. ```(language) (e.g., ```jsx, ```css)
+    // 4. The actual code content (non-greedy match)
+    // 5. ``` (closing fence)
+    const fileRegex = /(?:```[\w\d]*\n)?\/\/ Filename: (\/[\w\d\-\.]+\.(jsx|js|css))\n```(?:jsx|js|css)?\n([\s\S]*?)\n```/g;
+    let match;
+
+    let foundCodeBlocks = false; // Flag to check if any code blocks were found
+
+    // Reset regex lastIndex to ensure it searches from the beginning each time
+    fileRegex.lastIndex = 0; 
+
+    while ((match = fileRegex.exec(aiRawResponse)) !== null) {
+      foundCodeBlocks = true;
+      const filename = match[1];
+      const codeContent = match[3].trim(); // match[3] captures the code content
+      generatedFiles[filename] = codeContent;
     }
 
-    let parsed;
-    try {
-      parsed = JSON.parse(aiResponse);
-    } catch (err) {
-      let cleaned = aiResponse
-        .replace(/(?<!\\)\\(?!["\\/bfnrtu])/g, '\\\\')
-        .replace(/(?<!\\)\n/g, '\\n')
-        .replace(/(?<!\\)\r/g, '\\r');
-      parsed = JSON.parse(cleaned);
+    // --- NEW: Enhanced filtering for HTML content in JS/JSX files ---
+    const htmlContentRegex = /<\s*(html|head|body|!doctype|meta|title)\s*>/i; // Common HTML tags
+    const htmlFileExtensions = ['.html', '.htm'];
+    const jsLikeFileExtensions = ['.js', '.jsx'];
+
+    for (const filename in generatedFiles) {
+      const lowerFilename = filename.toLowerCase();
+      const content = generatedFiles[filename];
+
+      // 1. Filter out explicit HTML files
+      if (htmlFileExtensions.some(ext => lowerFilename.endsWith(ext))) {
+        console.warn(`🗑️ Filtering out unwanted HTML file: ${filename} (by extension)`);
+        delete generatedFiles[filename];
+        continue; // Move to the next file
+      }
+
+      // 2. Check content of JS/JSX files for HTML
+      if (jsLikeFileExtensions.some(ext => lowerFilename.endsWith(ext))) {
+        if (htmlContentRegex.test(content.substring(0, 500))) { // Check first 500 chars for efficiency
+          console.warn(`🗑️ Filtering out unwanted HTML content in JS/JSX file: ${filename}`);
+          delete generatedFiles[filename];
+          continue; // Move to the next file
+        }
+      }
+    }
+    // --- END NEW ---
+
+    if (!foundCodeBlocks || Object.keys(generatedFiles).length === 0) {
+        console.error('No valid code blocks found in AI response after filtering:', aiRawResponse.substring(0, 500));
+        throw new Error('AI did not return valid code in the expected markdown block format or all valid files were filtered.');
     }
 
-    if (parsed?.files && typeof parsed.files === 'object') {
-      res.json({ files: parsed.files });
-    } else {
-      throw new Error('Expected structure: { files: { "filename": "code..." } }');
-    }
+    res.json({ files: generatedFiles });
 
   } catch (error) {
-    res.status(500).json({ message: `frontend code generation failed.`, error: error.message });
+    console.error('❌ Backend code generation error:', error);
+    // Propagate the specific error message from AIModel.js or parsing
+    res.status(500).json({ message: `Code generation failed: ${error.message}` });
   }
 });
 
