@@ -43,6 +43,7 @@ For example:
 
 **CORE REQUIREMENTS:**
 - **Technology Stack:** React (functional components, hooks) and Tailwind CSS.
+- **File Extensions:** Always use **.jsx** for React components (e.g., /App.jsx, /index.jsx). Only use .js for plain JavaScript files if absolutely necessary (e.g., a utility file that doesn't contain JSX). **DO NOT generate a /App.js file if /App.jsx is provided.**
 - **Styling:** ALL styling MUST be done using Tailwind CSS utility classes. DO NOT use inline styles, CSS modules, or separate CSS files beyond \`/index.css\` for Tailwind directives.
 - **Completeness:** Provide all necessary files for a basic, runnable React application within a Sandpack environment. This typically includes \`/App.jsx\`, \`/index.jsx\`, and \`/index.css\`.
 - **Minimalism:** Generate only the code directly relevant to the requested feature. Avoid unnecessary complexity or boilerplate.
@@ -55,7 +56,10 @@ For example:
 - For icons, prefer inline SVGs or common icon libraries if absolutely necessary (but avoid external fetches).
 
 **STRICTLY AVOID:**
-- **ABSOLUTELY NO HTML FILES (e.g., index.html, public/index.html). Your output MUST contain ONLY .jsx, .js, and .css files.**
+- **ABSOLUTELY NO HTML FILES (e.g., index.html, public/index.html). Your output MUST contain ONLY .jsx and .css files for the main application structure.**
+- **NO duplicate App files**
+- **Create App.jsx file**
+- **Connect App.js with App.jsx**
 - **No external image/font URLs.**
 - **No \`alert()\`, \`confirm()\`, \`prompt()\` or \`window\` methods that interact with the browser UI directly.**
 - **No external API calls unless explicitly requested and detailed in the prompt.**
