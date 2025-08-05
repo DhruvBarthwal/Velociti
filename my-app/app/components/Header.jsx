@@ -8,6 +8,13 @@ const Header = () => {
   const { user, loading, refreshUser } = useUser();
   const router = useRouter();
 
+  const headings = [
+    {id: '1',name: 'Home'},
+    {id: '2' ,name: 'Price'},
+    {id: '3' ,name: 'About'},
+    {id: '4' ,name: 'Support'},
+
+  ];
   const handleSignIn = () => {
     window.open("http://localhost:5000/auth/google", "_self");
   };
@@ -30,13 +37,18 @@ const Header = () => {
   return (
     <div className="flex justify-between p-5 items-center">
       <div>
-        <h1 className="font-bold text-[30px]">Velociti</h1>
+        <h1 className="font-bold text-[30px] font-sans italic">Velociti</h1>
+      </div>
+      <div className="absolute flex gap-10 left-1/3 ml-[90px] text-[15px]">
+        {headings.map((item,index)=>(
+          <h1 key={index} className="cursor-pointer hover:text-amber-200">{item.name}</h1>
+        ))}
       </div>
 
       {loading ? (
         <div className="text-white">Loading user...</div>
       ) : user ? (
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-6">
           <img
             src={profileImageUrl}
             alt={user?.name ? `${user.name}'s profile` : "Profile"}

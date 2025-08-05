@@ -1,20 +1,29 @@
+// Filename: WorkspacePage.jsx
 "use client";
 import { useEffect, useState, use } from "react";
-import Image from "next/image";
-import History from "@/app/components/History"; // Assuming this path is correct
-import Code from "@/app/components/Code"; // Assuming this path is correct
+import { useRouter } from 'next/navigation';
+import History from "@/app/components/History";
+import Code from "@/app/components/Code";
+import Header2 from "@/app/components/Header2";
+import axios from 'axios';
+
+axios.defaults.withCredentials = true;
 
 export default function WorkspacePage({ params }) {
   const resolvedParams = use(params);
   const id = resolvedParams.id;
+  const router = useRouter();
 
   const [idea, setIdea] = useState("");
+  const [repoUrl, setRepoUrl] = useState("");
+  const [isConnected, setIsConnected] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState("idle");
+  const [generatedFiles, setGeneratedFiles] = useState([]);
 
   useEffect(() => {
     if (id) {
-      // Handle the "new" ID for a new chat
       if (id === "new") {
-        setIdea(""); // No initial idea for a new chat
+        setIdea("");
       } else {
         const storedIdea = localStorage.getItem(`workspace-${id}`);
         if (storedIdea) {
@@ -27,23 +36,85 @@ export default function WorkspacePage({ params }) {
     }
   }, [id]);
 
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/auth/me');
+        if (response.status === 200 && response.data) {
+          setIsConnected(true);
+        } else {
+          setIsConnected(false);
+        }
+      } catch (err) {
+        setIsConnected(false);
+        console.warn("User not authenticated or backend is not running.", err);
+      }
+    };
+    
+    checkAuthStatus();
+  }, []);
+
+  const onUpload = async () => {
+    // 🚀 MODIFIED: Reverting to using the actual generatedFiles state.
+    if (!repoUrl || !generatedFiles || generatedFiles.length === 0) {
+      alert("❌ Please connect to a repo and generate some code before uploading.");
+      return;
+    }
+
+    setUploadStatus("loading");
+
+    try {
+      const response = await axios.post(
+        'http://localhost:5000/api/upload-to-github',
+        {
+          repoUrl,
+          generatedFiles,
+        },
+        { withCredentials: true }
+      );
+
+      if (response.status === 200) {
+        setUploadStatus("success");
+        alert("✅ All files uploaded to GitHub!");
+      } else {
+        throw new Error(response.data.error || 'Upload failed with an unknown error.');
+      }
+    } catch (err) {
+      console.error(err);
+      setUploadStatus("error");
+      alert(`❌ Upload failed with a 401 error. Your backend authentication is the problem. Details: ${err.message}`);
+    }
+  };
+
+  const handleConnectGithub = () => {
+    window.location.href = `http://localhost:5000/auth/github?workspaceId=${id}`;
+  };
+
   return (
     <div className="relative h-screen w-full overflow-hidden bg-zinc-950 text-white">
-      <div className="absolute inset-0 z-0 overflow-hidden">
-        <div className="absolute top-1/3 left-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/10 blur-3xl animate-pulse" />
-        <div className="absolute bottom-10 right-10 h-72 w-72 bg-purple-500/20 rounded-full blur-2xl animate-pulse" />
-        <div className="absolute top-10 left-10 h-72 w-72 bg-blue-400/10 rounded-full blur-2xl " />
-        <div className="absolute bottom-10 left-10 h-72 w-72 bg-blue-400/10 rounded-full blur-2xl " />
-        <div className="absolute top-1 right-10 h-72 w-72 bg-blue-400/10 rounded-full blur-2xl " />
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-1/2 left-[-200px] h-[600px] w-[600px] -translate-y-1/2 rounded-full bg-blue-400/20 blur-[180px]" />
+        <div className="absolute top-1/2 right-[-200px] h-[600px] w-[600px] -translate-y-1/2 rounded-full bg-purple-500/20 blur-[180px]" />
       </div>
 
-      {/* Foreground Content */}
       <div className="relative z-20 h-full pt-2 w-full flex flex-col">
-        <h1 className="p-3 text-2xl font-bold text-center">Velociti</h1>
-        <div className="flex-1 flex  p-4">
-          <History topic={idea} /> {/* History component receives topic */}
-          {/* Pass both 'id' and 'initialIdea' to the Code component */}
-          <Code id={id} initialIdea={idea} /> {/* <--- CRUCIAL CHANGE HERE */}
+        <Header2
+          isConnected={isConnected}
+          setIsConnected={setIsConnected}
+          repoUrl={repoUrl}
+          setRepoUrl={setRepoUrl}
+          onUpload={onUpload}
+          uploadStatus={uploadStatus}
+          setUploadStatus={setUploadStatus}
+          onConnectGithub={handleConnectGithub}
+        />
+        <div className="flex-1 flex p-4">
+          <History topic={idea} />
+          <Code
+            id={id}
+            initialIdea={idea}
+            setGeneratedFiles={setGeneratedFiles}
+          />
         </div>
       </div>
     </div>

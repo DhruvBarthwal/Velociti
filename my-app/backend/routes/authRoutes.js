@@ -1,3 +1,4 @@
+// Filename: /routes/authRoutes.js
 import express from 'express';
 import passport from 'passport';
 
@@ -22,13 +23,18 @@ router.get(
 // ✅ Step 3: Get current user
 router.get('/me', (req, res) => {
   if (req.user) {
-    res.status(200).json(req.user); // ❌ FIXED: You had a comma instead of dot
+    res.status(200).json(req.user);
   } else {
     res.status(401).json({ message: 'Not Authenticated' });
   }
 });
 
-// ✅ Step 4: Logout user
+// ✅ Step 4: Initiate GitHub authentication
+router.get("/github", passport.authenticate("github", { scope: ["user:email"] }));
+
+// ✅ Removed the redundant /github/callback route as it is defined in server.js.
+
+// ✅ Step 5: Logout user
 router.get("/logout", (req, res) => {
   req.logout(() => {
     req.session.destroy(() => {

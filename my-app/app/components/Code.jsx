@@ -1,10 +1,15 @@
+// Filename: Code.jsx
 import React, { useState } from 'react';
 import Chat from './Chat';
 import CodeEditor from './CodeEditor';
 
-const Code = ({ id, initialIdea }) => {
+// Assuming your CSS for the toggle is already imported elsewhere or globally available
+// import './your-toggle-styles.css'; // You might need to uncomment and adjust this path if your toggle CSS is in a separate file
+
+// 🚀 Corrected: Added setGeneratedFiles to the props received from the parent
+const Code = ({ id, initialIdea, setGeneratedFiles }) => {
   const [showCode, setShowCode] = useState(true); // State for toggling code/preview view
-  // New state to hold the user's request for code generation
+  // State to hold the user's request for code generation
   // Initialize with initialIdea if it's a valid string, otherwise empty
   const [userRequestForCode, setUserRequestForCode] = useState(
     initialIdea && initialIdea !== 'Idea not found.' ? initialIdea : ''
@@ -18,38 +23,54 @@ const Code = ({ id, initialIdea }) => {
     }
   };
 
+  // Handler for the custom toggle's change event
+  const handleToggleChange = (event) => {
+    // If the checkbox is checked, it means we want to show the preview (showCode = false)
+    // If the checkbox is unchecked, it means we want to show the code (showCode = true)
+    setShowCode(!event.target.checked);
+  };
+
   return (
     <div className='bg-white/10 backdrop-blur-2xl flex gap-4 p-3 h-[calc(100vh-100px)] w-full rounded-[12px] ml-6 mr-3 border border-white/30'>
-      {/* Pass the new handler to Chat component */}
+      {/* Pass the handler to the Chat component */}
       <Chat
         id={id}
         initialIdea={initialIdea}
-        onNewUserMessageForCode={handleNewUserMessageForCode} // <--- NEW PROP
+        onNewUserMessageForCode={handleNewUserMessageForCode}
       />
 
-      {/* Container for CodeEditor with a fixed width */}
+      {/* Container for CodeEditor */}
       <div className="flex flex-col relative w-full">
-        {/* Toggle buttons for Code/Preview view */}
-        <div className="absolute top-2 right-2 z-30 flex rounded-lg overflow-hidden">
-          <button
-            onClick={() => setShowCode(true)}
-            className={`px-4 py-2 transition-all duration-300 ${
-              showCode ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-            }`}
-          >
-            Code
-          </button>
-          <button
-            onClick={() => setShowCode(false)}
-            className={`px-4 py-2 transition-all duration-300 ${
-              !showCode ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-            }`}
-          >
-            Preview
-          </button>
+        {/* Custom Toggle for Code/Preview view */}
+        <div className="absolute top-1 right-1 z-30"> {/* Adjusted top/right slightly for better placement with toggle styles */}
+          <div className="container">
+            <input
+              type="checkbox"
+              name="checkbox"
+              id="checkbox"
+              // The checkbox is 'checked' when we are showing the preview (showCode is false)
+              checked={!showCode}
+              onChange={handleToggleChange}
+            />
+            <label htmlFor="checkbox" className="label">
+              <div className="ball">
+                {/* Conditionally render icon based on current view */}
+                {showCode ? ( // If currently showing code, the toggle's "ball" shows the "Preview" eye icon
+                  <span className="text-lg"></span>
+                ) : ( // If currently showing preview, the toggle's "ball" shows the "Code" icon
+                  <span className="text-sm"></span>
+                )}
+              </div>
+            </label>
+          </div>
         </div>
-        {/* Pass userRequestForCode as the topic prop to CodeEditor */}
-        <CodeEditor topic={userRequestForCode} showCode={showCode} /> {/* <--- UPDATED PROP */}
+
+        {/* 🚀 Corrected: Passed the setGeneratedFiles prop down to the CodeEditor component */}
+        <CodeEditor
+          topic={userRequestForCode}
+          showCode={showCode}
+          setGeneratedFiles={setGeneratedFiles}
+        />
       </div>
     </div>
   );
