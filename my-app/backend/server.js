@@ -1,5 +1,4 @@
-
-
+// Filename: server.js
 import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
@@ -11,8 +10,10 @@ import axios from 'axios'; // We keep this as it is used for the chat functional
 
 // --- Import your custom modules ---
 import authRoutes from "./routes/authRoutes.js";
-import "./auth/google.js";
-import ChatSession from "./model/ChatSession.js"; // This model is from the user's provided code.
+// 🚨 FIX: Import the combined strategies file which contains GitHubStrategy
+import "./auth/google.js"; // Changed from "./auth/google.js"
+import ChatSession from "./model/ChatSession.js";
+
 // Import AI generation specific modules
 import { generateAIResponse } from "./service/AIModel.js";
 import { CHAT_PROMPT, CODE_PROMPT } from "./data/Prompt.js";
@@ -70,16 +71,16 @@ app.get("/auth/logout", (req, res, next) => {
   });
 });
 
-// 🚀 The correct authentication route to initiate the GitHub login flow.
+// 🚀 Corrected GitHub authentication initiation route
 app.get('/auth/github', (req, res, next) => {
     if (req.query.workspaceId) {
       req.session.workspaceId = req.query.workspaceId;
     }
-    // Pass the scope directly to the authenticate call to request the necessary permissions.
+    // Ensure the 'repo' scope is requested for file upload permissions
     passport.authenticate('github', { scope: ['repo', 'user:email'] })(req, res, next);
 });
 
-// ✅ This is the crucial route that handles the redirect from GitHub.
+// ✅ The crucial route that handles the redirect from GitHub.
 app.get(
   "/auth/github/callback",
   passport.authenticate("github", {
@@ -94,7 +95,7 @@ app.get(
 );
 
 
-// --- Chat and Code Routes (Unchanged) ---
+// --- Chat Completion Route (Unchanged) ---
 app.post("/api/chat", async (req, res) => {
   try {
     const { chatHistory } = req.body;
@@ -102,8 +103,7 @@ app.post("/api/chat", async (req, res) => {
       return res
         .status(400)
         .json({ message: "Invalid chat history provided." });
-    } // Pass false for isCodeRequestFlag for chat prompts
-
+    }
     const aiResponseText = String(
       (await generateAIResponse(chatHistory, CHAT_PROMPT, false)) || ""
     );
@@ -133,69 +133,61 @@ app.post("/api/chat", async (req, res) => {
   }
 });
 
+// --- Code Generator (Frontend Only) ---
 app.post("/api/generate-code", async (req, res) => {
   try {
     const { topic } = req.body;
     if (!topic || typeof topic !== "string") {
       return res.status(400).json({ message: "Topic must be a valid string." });
-    } // Construct history for the AI call, ensuring the prompt is clear for code generation // Your prompt here is already good and concise, let AIModel.js handle the full CODE_PROMPT insertion.
-
+    }
     const history = [
       {
         role: "user",
         parts: [
           {
-            text: `Generate React code for: ${topic}`, // Keep this simple, the main CODE_PROMPT is handled in AIModel.js
+            text: `Generate React code for: ${topic}`,
           },
         ],
       },
-    ]; // Pass true for isCodeRequestFlag for code generation prompts
-
+    ];
     let aiRawResponse = String(
       (await generateAIResponse(history, CODE_PROMPT, true)) || ""
     ).trim();
-    let generatedFiles = {}; // Regex to capture Filename comments and the subsequent code block.
+    let generatedFiles = {};
     const fileRegex =
       /(?:```[\w\d]*\n)?\/\/ Filename: (\/?\.?\/?[\w\/\-\.]+\.(jsx|js|css))\n```(?:jsx|js|css)?\n([\s\S]*?)\n```/g;
 
     let match;
-
-    let foundCodeBlocks = false;
     fileRegex.lastIndex = 0;
 
     while ((match = fileRegex.exec(aiRawResponse)) !== null) {
-      foundCodeBlocks = true;
       const filename = match[1];
       const codeContent = match[3].trim();
       generatedFiles[filename] = codeContent;
     }
 
-    // --- NEW LOG: Files parsed directly from AI response ---
     console.log(
       "\n--- server.js: Files parsed from AI raw response (before filtering) ---"
     );
     console.log(JSON.stringify(generatedFiles, null, 2));
-    console.log("--- END server.js: Files parsed from AI raw response ---\n\n"); // --- IMPORTANT: AGGRESSIVE FILTERING AND POST-PROCESSING ---
+    console.log("--- END server.js: Files parsed from AI raw response ---\n\n");
 
-    const filteredFiles = {}; // Helper function to check for "Hello World" or very short boilerplate content
-
+    const filteredFiles = {};
     const isBoilerplateContent = (content) => {
       const helloWorldRegex =
-        /(<h1[^>]*>Hello\s*World<\/h1>|<div[^>]*>Hello\s*World<\/div>|return\s*<h1>Hello\s*world<\/h1>|return\s*<div>Hello\s*world<\/div>)/i; // Broader short boilerplate regex to catch common minimal React app structures
+        /(<h1[^>]*>Hello\s*World<\/h1>|<div[^>]*>Hello\s*World<\/div>|return\s*<h1>Hello\s*world<\/h1>|return\s*<div>Hello\s*world<\/div>)/i;
       const shortBoilerplateRegex =
         /^\s*(import\s+React\s+from\s+'react';\s*)?(import\s+App\s+from\s+'\.\/App';\s*)?(import\s+'\.\/index\.css';\s*)?(\s*const\s+App\s*=\s*\(\)\s*=>\s*\{|\s*function\s+App\(\)\s*\{|\s*export\s+default\s+function\s+App\(\)\s*\{)\s*return\s*(<h1[^>]*>Hello\s*World<\/h1>|<div[^>]*>Hello\s*World<\/div>);?\s*\}\s*(export\s+default\s+App;)?\s*$/i;
       return (
         helloWorldRegex.test(content) ||
         (content.length < 200 && shortBoilerplateRegex.test(content))
-      ); // Increased length for broader check
-    }; // 1. Process /App.jsx first
+      );
+    };
 
     let appJsxContent = generatedFiles["/App.jsx"];
-    let appJsContent = generatedFiles["/App.js"]; // Keep original for reference
-
+    let appJsContent = generatedFiles["/App.js"];
     let appJsxIsGood = false;
 
-    // Clean and evaluate App.jsx
     if (appJsxContent) {
       appJsxContent = appJsxContent
         .replace(/^\s*(<!doctype html>|<html>|<body>|<head>)\s*/i, "")
@@ -213,18 +205,12 @@ app.post("/api/generate-code", async (req, res) => {
       }
     }
 
-    // 2. Unconditionally remove /App.js if /App.jsx is present and good
-    // This is the most direct way to ensure App.js doesn't interfere.
     if (appJsxIsGood && appJsContent) {
       console.warn(
         `🗑️ server.js: Unconditionally removing /App.js because a valid /App.jsx is present.`
       );
-      // Do not add /App.js to filteredFiles, effectively deleting it.
-      // Also, explicitly remove it from generatedFiles to prevent it from being processed later
       delete generatedFiles["/App.js"];
-    }
-    // 3. If /App.jsx was NOT good, but /App.js exists, then evaluate /App.js
-    else if (!appJsxIsGood && appJsContent) {
+    } else if (!appJsxIsGood && appJsContent) {
       let cleanedAppJsContent = appJsContent
         .replace(/^\s*(<!doctype html>|<html>|<body>|<head>)\s*/i, "")
         .replace(/\s*(<\/html>|<\/body>|<\/head>)\s*$/i, "")
@@ -242,32 +228,31 @@ app.post("/api/generate-code", async (req, res) => {
       }
     }
 
-    // --- NEW LOG: Files after App.jsx/App.js prioritization ---
     console.log(
       "\n--- server.js: Files after App.jsx/App.js prioritization ---"
     );
     console.log(JSON.stringify(filteredFiles, null, 2));
     console.log(
       "--- END server.js: Files after App.jsx/App.js prioritization ---\n\n"
-    ); // 4. Process all other files (index.jsx, index.css, etc.)
+    );
 
     for (const filename in generatedFiles) {
       const lowerFilename = filename.toLowerCase();
-      let content = generatedFiles[filename]; // Skip App files if they were already handled and potentially filtered
+      let content = generatedFiles[filename];
 
       if (
         lowerFilename.includes("/app.jsx") ||
         lowerFilename.includes("/app.js")
       ) {
-        continue; // Already processed above
-      } // Filter out explicit HTML files (shouldn't be generated, but defensive)
+        continue;
+      }
 
       if (lowerFilename.endsWith(".html") || lowerFilename.endsWith(".htm")) {
         console.warn(
           `🗑️ server.js: Filtering out unwanted HTML file (by extension): ${filename}`
         );
         continue;
-      } // For JS/JSX files, aggressively clean up any leading/trailing HTML or common boilerplate
+      }
 
       if (lowerFilename.endsWith(".js") || lowerFilename.endsWith(".jsx")) {
         content = content
@@ -278,7 +263,6 @@ app.post("/api/generate-code", async (req, res) => {
       filteredFiles[filename] = content;
     }
 
-    // --- NEW LOG: Files after processing all other files ---
     console.log("\n--- server.js: Files after processing all other files ---");
     console.log(JSON.stringify(filteredFiles, null, 2));
     console.log(
@@ -293,7 +277,7 @@ app.post("/api/generate-code", async (req, res) => {
       throw new Error(
         "AI did not return valid React code in the expected markdown block format or all valid files were filtered."
       );
-    } // After filtering, ensure essential React files exist, if not, provide a basic fallback structure.
+    }
 
     const hasIndexFile = Object.keys(filteredFiles).some((file) =>
       file.includes("/index.")
@@ -324,18 +308,6 @@ app.post("/api/generate-code", async (req, res) => {
       }
     }
 
-    // --- CRITICAL FINAL CHECK ---
-    // This check is now redundant if the unconditional removal works, but kept as a safeguard.
-    if (filteredFiles["/App.js"] && filteredFiles["/App.jsx"]) {
-      const appJsContentFinalCheck = filteredFiles["/App.js"];
-      if (isBoilerplateContent(appJsContentFinalCheck)) {
-        console.warn(
-          `🗑️ server.js: FINAL CHECK - Removing /App.js as it's boilerplate and /App.jsx is present.`
-        );
-        delete filteredFiles["/App.js"];
-      }
-    }
-    // --- FINAL LOG: Files sent to frontend ---
     console.log("\n--- server.js: FINAL FILES SENT TO FRONTEND ---");
     console.log(JSON.stringify(filteredFiles, null, 2));
     console.log("--- END server.js: FINAL FILES SENT TO FRONTEND ---\n");

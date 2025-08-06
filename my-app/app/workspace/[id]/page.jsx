@@ -55,36 +55,48 @@ export default function WorkspacePage({ params }) {
   }, []);
 
   const onUpload = async () => {
-    // 🚀 MODIFIED: Reverting to using the actual generatedFiles state.
-    if (!repoUrl || !generatedFiles || generatedFiles.length === 0) {
-      alert("❌ Please connect to a repo and generate some code before uploading.");
-      return;
-    }
+  // If no files are generated, add a dummy one
+  let filesToUpload = generatedFiles;
 
-    setUploadStatus("loading");
+  if (!repoUrl) {
+    alert("❌ Please connect to a GitHub repo first.");
+    return;
+  }
 
-    try {
-      const response = await axios.post(
-        'http://localhost:5000/api/upload-to-github',
-        {
-          repoUrl,
-          generatedFiles,
-        },
-        { withCredentials: true }
-      );
-
-      if (response.status === 200) {
-        setUploadStatus("success");
-        alert("✅ All files uploaded to GitHub!");
-      } else {
-        throw new Error(response.data.error || 'Upload failed with an unknown error.');
+  if (!generatedFiles || generatedFiles.length === 0) {
+    filesToUpload = [
+      {
+        path: "dummy.txt",
+        content: "This is a dummy file generated for testing upload functionality."
       }
-    } catch (err) {
-      console.error(err);
-      setUploadStatus("error");
-      alert(`❌ Upload failed with a 401 error. Your backend authentication is the problem. Details: ${err.message}`);
+    ];
+  }
+
+  setUploadStatus("loading");
+
+  try {
+    const response = await axios.post(
+      'http://localhost:5000/api/upload-to-github',
+      {
+        repoUrl,
+        generatedFiles: filesToUpload,
+      },
+      { withCredentials: true }
+    );
+
+    if (response.status === 200) {
+      setUploadStatus("success");
+      alert("✅ Files uploaded to GitHub!");
+    } else {
+      throw new Error(response.data.error || 'Upload failed with an unknown error.');
     }
-  };
+  } catch (err) {
+    console.error(err);
+    setUploadStatus("error");
+    alert(`❌ Upload failed. Details: ${err.message}`);
+  }
+};
+
 
   const handleConnectGithub = () => {
     window.location.href = `http://localhost:5000/auth/github?workspaceId=${id}`;

@@ -1,8 +1,7 @@
-// Filename: Header2.js
+// Filename: Header2.jsx
 import React, { useEffect, useState } from 'react';
-import { FaGithub } from 'react-icons/fa';
-import { LuUpload, LuLoader2 } from 'react-icons/lu';
-
+import { FaGithub } from 'react-icons/fa'; // Correct import for FaGithub
+import { LuUpload, LuLoader2 } from 'lucide-react'; // 🚀 FIX: Correct import for LuUpload and LuLoader2
 
 const Header2 = ({
   isConnected,
@@ -11,8 +10,8 @@ const Header2 = ({
   setRepoUrl,
   uploadStatus,
   setUploadStatus,
-  onConnectGithub, // 🆕 The new prop for GitHub login
-  onUpload // 🆕 The new prop for the upload action
+  onConnectGithub,
+  onUpload
 }) => {
   const [showConnectBox, setShowConnectBox] = useState(false);
   const [inputUrl, setInputUrl] = useState('');
@@ -22,15 +21,15 @@ const Header2 = ({
     const savedUrl = localStorage.getItem('repoUrl');
     if (savedUrl) {
       setRepoUrl(savedUrl);
-      setIsConnected(true);
+      // setIsConnected(true); // This should be handled by WorkspacePage's auth check
     }
-  }, [setRepoUrl, setIsConnected]);
+  }, [setRepoUrl]); // Removed setIsConnected from dependency array as it's handled by parent
 
   const handleConnectClick = () => {
     if (inputUrl) {
       localStorage.setItem('repoUrl', inputUrl);
       setRepoUrl(inputUrl);
-      setIsConnected(true);
+      // setIsConnected(true); // This should be handled by WorkspacePage's auth check
       setShowConnectBox(false); // Close the box on successful connection
       setInputUrl('');
     }
@@ -43,7 +42,7 @@ const Header2 = ({
       </div>
 
       <div className='mr-5 flex items-center gap-4 relative'>
-        {/* 🆕 Conditional rendering based on isConnected state from the parent */}
+        {/* Conditional rendering based on isConnected state from the parent */}
         {!isConnected ? (
           <button
             onClick={onConnectGithub}
@@ -54,7 +53,7 @@ const Header2 = ({
         ) : (
           <button
             onClick={() => setShowConnectBox(!showConnectBox)}
-            className='border p-2 flex justify-center items-center gap-2 rounded-[10px] cursor-pointer hover:bg-white hover:text-black hover:shadow-lg hover:transition duration-300'
+            className='border border-white/20 p-2 bg-green-600 flex justify-center items-center gap-2 rounded-[10px] cursor-pointer hover:bg-white hover:text-black hover:shadow-lg hover:transition duration-300'
           >
             <FaGithub /> Sync with GitHub
           </button>
@@ -74,7 +73,7 @@ const Header2 = ({
                   {repoUrl}
                 </a>
                 <button
-                  onClick={onUpload} // 🚀 Calls the onUpload prop from the parent
+                  onClick={onUpload}
                   disabled={uploadStatus === 'loading'}
                   className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-700 disabled:cursor-not-allowed transition"
                 >
@@ -95,7 +94,7 @@ const Header2 = ({
                   type="text"
                   value={inputUrl}
                   onChange={(e) => setInputUrl(e.target.value)}
-                  placeholder="e.g., https://github.com/user/repo"
+                  placeholder="e.g., [https://github.com/user/repo](https://github.com/user/repo)"
                   className="w-full p-2 mb-2 rounded-lg bg-zinc-800 text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
                 />
                 <button

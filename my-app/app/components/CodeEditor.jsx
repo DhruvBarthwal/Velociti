@@ -1,22 +1,22 @@
 "use client"; // This component needs client-side functionality
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   SandpackProvider,
   SandpackLayout,
   SandpackCodeEditor,
   SandpackPreview,
   SandpackFileExplorer,
-} from '@codesandbox/sandpack-react';
+} from "@codesandbox/sandpack-react";
 
 const CodeEditor = ({ topic, showCode }) => {
   const [generatedCodeFiles, setGeneratedCodeFiles] = useState(null);
   const [isLoadingCode, setIsLoadingCode] = useState(false);
   const [codeError, setCodeError] = useState(null);
-  const [mainSandpackFile, setMainSandpackFile] = useState('/index.jsx');
+  const [mainSandpackFile, setMainSandpackFile] = useState("/index.jsx");
 
   const fetchCode = async (currentTopic) => {
-    if (!currentTopic || currentTopic === 'Idea not found.') {
+    if (!currentTopic || currentTopic === "Idea not found.") {
       setGeneratedCodeFiles(null);
       return;
     }
@@ -25,10 +25,10 @@ const CodeEditor = ({ topic, showCode }) => {
     setCodeError(null);
 
     try {
-      const response = await fetch('http://localhost:5000/api/generate-code', {
-        method: 'POST',
+      const response = await fetch("http://localhost:5000/api/generate-code", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ topic: currentTopic }),
       });
@@ -38,53 +38,61 @@ const CodeEditor = ({ topic, showCode }) => {
       if (!response.ok) {
         let errorData = {};
         try {
-          errorData = JSON.parse(responseText); 
+          errorData = JSON.parse(responseText);
         } catch (e) {
-          errorData = { message: responseText || 'Unknown error format' }; 
+          errorData = { message: responseText || "Unknown error format" };
         }
-        throw new Error(errorData.message || `Backend code generation error: ${response.status}`);
+        throw new Error(
+          errorData.message ||
+            `Backend code generation error: ${response.status}`
+        );
       }
 
-      const data = JSON.parse(responseText); 
+      const data = JSON.parse(responseText);
 
-      if (data.files && typeof data.files === 'object') {
-        const filesForSandpack = { ...data.files }; 
+      if (data.files && typeof data.files === "object") {
+        const filesForSandpack = { ...data.files };
 
-        let determinedMainFile = '/index.jsx';
+        let determinedMainFile = "/index.jsx";
 
-        if (filesForSandpack['/index.jsx']) {
-          determinedMainFile = '/index.jsx';
-        } else if (filesForSandpack['/index.js']) {
-          determinedMainFile = '/index.js';
-        } 
-        else if (filesForSandpack['/App.jsx']) { 
-          determinedMainFile = '/App.jsx';
-        } else if (filesForSandpack['/App.js']) { 
-          determinedMainFile = '/App.js';
+        if (filesForSandpack["/index.jsx"]) {
+          determinedMainFile = "/index.jsx";
+        } else if (filesForSandpack["/index.js"]) {
+          determinedMainFile = "/index.js";
+        } else if (filesForSandpack["/App.jsx"]) {
+          determinedMainFile = "/App.jsx";
+        } else if (filesForSandpack["/App.js"]) {
+          determinedMainFile = "/App.js";
         }
 
-        const appFileContent = filesForSandpack['/App.jsx'] || filesForSandpack['/App.js'];
-        const isHelloWorld = appFileContent && (
-            appFileContent.includes('return <h1>Hello world</h1>') ||
-            appFileContent.includes('return <h1>Hello World</h1>') ||
-            appFileContent.includes('return <div>Hello world</div>') ||
-            appFileContent.includes('return <div>Hello World</div>')
-        );
+        const appFileContent =
+          filesForSandpack["/App.jsx"] || filesForSandpack["/App.js"];
+        const isHelloWorld =
+          appFileContent &&
+          (appFileContent.includes("return <h1>Hello world</h1>") ||
+            appFileContent.includes("return <h1>Hello World</h1>") ||
+            appFileContent.includes("return <div>Hello world</div>") ||
+            appFileContent.includes("return <div>Hello World</div>"));
 
         if (isHelloWorld) {
-            setCodeError("The AI generated a basic 'Hello World' app. Please try again with a more specific request for the application's functionality.");
-            setGeneratedCodeFiles(null);
+          setCodeError(
+            "The AI generated a basic 'Hello World' app. Please try again with a more specific request for the application's functionality."
+          );
+          setGeneratedCodeFiles(null);
         } else {
-            setGeneratedCodeFiles(filesForSandpack); 
-            setMainSandpackFile(determinedMainFile);
+          setGeneratedCodeFiles(filesForSandpack);
+          setMainSandpackFile(determinedMainFile);
         }
       } else {
-        throw new Error('Invalid code response from backend: missing or malformed "files" property.');
+        throw new Error(
+          'Invalid code response from backend: missing or malformed "files" property.'
+        );
       }
-
     } catch (error) {
-      setCodeError(`Failed to generate code: ${error.message}. Please try again.`);
-      setGeneratedCodeFiles(null); 
+      setCodeError(
+        `Failed to generate code: ${error.message}. Please try again.`
+      );
+      setGeneratedCodeFiles(null);
     } finally {
       setIsLoadingCode(false);
     }
@@ -97,7 +105,8 @@ const CodeEditor = ({ topic, showCode }) => {
   if (isLoadingCode) {
     return (
       <div className="flex-1 flex w-full items-center text-center justify-center bg-white/10 backdrop-blur-lg rounded-2xl text-white">
-        <p>Generating code for "{topic}"...</p>
+        <div className="text-2xl">Generating code...</div>
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white"></div>
       </div>
     );
   }
@@ -120,7 +129,7 @@ const CodeEditor = ({ topic, showCode }) => {
 
   // UPDATED: Added a components folder with a placeholder to the default files
   const defaultReactTemplateFiles = {
-    '/index.jsx': `import React from 'react';
+    "/index.jsx": `import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 
@@ -130,8 +139,8 @@ root.render(
     <App />
   </React.StrictMode>
 );`,
-    '/App.js': `import App from './App.jsx';\nexport default App;`, 
-    '/App.jsx': `import React from 'react';
+    "/App.js": `import App from './App.jsx';\nexport default App;`,
+    "/App.jsx": `import React from 'react';
 function App() {
   return (
     <div className="App">
@@ -142,7 +151,7 @@ function App() {
 }
 
 export default App;`,
-    '/package.json': `{
+    "/package.json": `{
   "name": "react-app",
   "version": "0.1.0",
   "private": true,
@@ -185,28 +194,30 @@ export default App;`,
   const finalFilesForSandpack = { ...defaultReactTemplateFiles };
 
   if (generatedCodeFiles) {
-      if (generatedCodeFiles['/App.jsx']) {
-          finalFilesForSandpack['/App.jsx'] = generatedCodeFiles['/App.jsx'];
-      } else if (generatedCodeFiles['/App.js']) {
-          finalFilesForSandpack['/App.jsx'] = generatedCodeFiles['/App.js'];
-      }
-      
-      finalFilesForSandpack['/App.js'] = `import App from './App.jsx';\nexport default App;`;
+    if (generatedCodeFiles["/App.jsx"]) {
+      finalFilesForSandpack["/App.jsx"] = generatedCodeFiles["/App.jsx"];
+    } else if (generatedCodeFiles["/App.js"]) {
+      finalFilesForSandpack["/App.jsx"] = generatedCodeFiles["/App.js"];
+    }
 
-      for (const filename in generatedCodeFiles) {
-          if (filename !== '/App.jsx' && filename !== '/App.js') {
-              // The logic here is already pretty good, it handles file paths correctly.
-              // Just ensure it's robust enough for a new folder.
-              // This simple loop should work correctly for '/components/...' files.
-              finalFilesForSandpack[filename] = generatedCodeFiles[filename];
-          }
+    finalFilesForSandpack[
+      "/App.js"
+    ] = `import App from './App.jsx';\nexport default App;`;
+
+    for (const filename in generatedCodeFiles) {
+      if (filename !== "/App.jsx" && filename !== "/App.js") {
+        // The logic here is already pretty good, it handles file paths correctly.
+        // Just ensure it's robust enough for a new folder.
+        // This simple loop should work correctly for '/components/...' files.
+        finalFilesForSandpack[filename] = generatedCodeFiles[filename];
       }
+    }
   }
 
   return (
-    <div className="flex-1 h-full relative"> 
-      <div className="overflow-hidden rounded-lg h-full w-full"> 
-        <SandpackProvider 
+    <div className="flex-1 h-full relative">
+      <div className="overflow-hidden rounded-lg h-full w-full">
+        <SandpackProvider
           key={JSON.stringify(generatedCodeFiles)}
           template="react"
           files={finalFilesForSandpack}
@@ -219,30 +230,34 @@ export default App;`,
             showLoadingScreen: true,
             mainFile: mainSandpackFile,
             activeFile: mainSandpackFile,
-            externalResources: ["https://cdn.tailwindcss.com"]
+            externalResources: ["https://cdn.tailwindcss.com"],
           }}
         >
-          <SandpackLayout className="h-full w-full"> 
+          <SandpackLayout className="h-full w-full">
             {showCode && (
               <div className="h-[600px] flex-shrink-0 w-[150px]">
                 <SandpackFileExplorer className="h-full" />
               </div>
             )}
-            
-            <div className={`
+
+            <div
+              className={`
               transition-opacity duration-500 
-              ${showCode ? 'opacity-100 block' : 'opacity-0 hidden'} 
+              ${showCode ? "opacity-100 block" : "opacity-0 hidden"} 
               flex-1 h-full w-[200px]
-            `}>
-              <SandpackCodeEditor className='h-[600px] ' />
+            `}
+            >
+              <SandpackCodeEditor className="h-[600px] " />
             </div>
-            
-            <div className={`
+
+            <div
+              className={`
               transition-opacity duration-500 
-              ${!showCode ? 'opacity-100 block' : 'opacity-0 hidden'} 
+              ${!showCode ? "opacity-100 block" : "opacity-0 hidden"} 
               h-[600px] w-full rounded-[10px] overflow-y-auto
-            `}>
-              <SandpackPreview className='h-full' /> 
+            `}
+            >
+              <SandpackPreview className=" preview h-full " />
             </div>
           </SandpackLayout>
         </SandpackProvider>

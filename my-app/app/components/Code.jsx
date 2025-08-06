@@ -3,8 +3,6 @@ import React, { useState } from 'react';
 import Chat from './Chat';
 import CodeEditor from './CodeEditor';
 
-// Assuming your CSS for the toggle is already imported elsewhere or globally available
-// import './your-toggle-styles.css'; // You might need to uncomment and adjust this path if your toggle CSS is in a separate file
 
 // 🚀 Corrected: Added setGeneratedFiles to the props received from the parent
 const Code = ({ id, initialIdea, setGeneratedFiles }) => {
