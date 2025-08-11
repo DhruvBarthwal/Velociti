@@ -1,4 +1,4 @@
-"use client"; // This component needs client-side functionality
+"use client"; 
 
 import React, { useState, useEffect } from "react";
 import {
@@ -162,7 +162,8 @@ export default App;`,
     "react-router-dom": "^6.4.2",
     "framer-motion": "^10.0.0",
     "react-icons": "^4.7.1",
-    "lucide-react": "^0.258.0"
+    "lucide-react": "^0.258.0",
+    "@heroicons/react": "^2.1.5"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -252,12 +253,12 @@ export default App;`,
 
             <div
               className={`
-              transition-opacity duration-500 
+              transition-opacity duration-500 scrollbar-hide 
               ${!showCode ? "opacity-100 block" : "opacity-0 hidden"} 
               h-[600px] w-full rounded-[10px] overflow-y-auto
             `}
             >
-              <SandpackPreview className=" preview h-full " />
+              <SandpackPreview className=" preview scrollbar-hide  h-full " />
             </div>
           </SandpackLayout>
         </SandpackProvider>

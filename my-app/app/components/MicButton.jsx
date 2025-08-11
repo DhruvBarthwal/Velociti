@@ -1,5 +1,3 @@
-// This line indicates that this component might use client-side features
-// in a Next.js environment, which is necessary for browser APIs like SpeechRecognition.
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";

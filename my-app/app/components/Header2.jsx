@@ -1,7 +1,6 @@
-// Filename: Header2.jsx
 import React, { useEffect, useState } from 'react';
-import { FaGithub } from 'react-icons/fa'; // Correct import for FaGithub
-import { LuUpload, LuLoader2 } from 'lucide-react'; // 🚀 FIX: Correct import for LuUpload and LuLoader2
+import { FaGithub } from 'react-icons/fa'; 
+import { LuUpload, LuLoader2 } from 'lucide-react';
 
 const Header2 = ({
   isConnected,
@@ -16,21 +15,19 @@ const Header2 = ({
   const [showConnectBox, setShowConnectBox] = useState(false);
   const [inputUrl, setInputUrl] = useState('');
 
-  // Checks for a saved repo URL on component mount
   useEffect(() => {
     const savedUrl = localStorage.getItem('repoUrl');
     if (savedUrl) {
       setRepoUrl(savedUrl);
-      // setIsConnected(true); // This should be handled by WorkspacePage's auth check
+
     }
-  }, [setRepoUrl]); // Removed setIsConnected from dependency array as it's handled by parent
+  }, [setRepoUrl]); 
 
   const handleConnectClick = () => {
     if (inputUrl) {
       localStorage.setItem('repoUrl', inputUrl);
       setRepoUrl(inputUrl);
-      // setIsConnected(true); // This should be handled by WorkspacePage's auth check
-      setShowConnectBox(false); // Close the box on successful connection
+      setShowConnectBox(false); 
       setInputUrl('');
     }
   };

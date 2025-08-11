@@ -1,10 +1,9 @@
-// Filename: Code.jsx
 import React, { useState } from 'react';
 import Chat from './Chat';
 import CodeEditor from './CodeEditor';
 
 
-// 🚀 Corrected: Added setGeneratedFiles to the props received from the parent
+
 const Code = ({ id, initialIdea, setGeneratedFiles }) => {
   const [showCode, setShowCode] = useState(true); // State for toggling code/preview view
   // State to hold the user's request for code generation
@@ -30,7 +29,6 @@ const Code = ({ id, initialIdea, setGeneratedFiles }) => {
 
   return (
     <div className='bg-white/10 backdrop-blur-2xl flex gap-4 p-3 h-[calc(100vh-100px)] w-full rounded-[12px] ml-6 mr-3 border border-white/30'>
-      {/* Pass the handler to the Chat component */}
       <Chat
         id={id}
         initialIdea={initialIdea}
@@ -40,7 +38,7 @@ const Code = ({ id, initialIdea, setGeneratedFiles }) => {
       {/* Container for CodeEditor */}
       <div className="flex flex-col relative w-full">
         {/* Custom Toggle for Code/Preview view */}
-        <div className="absolute top-1 right-1 z-30"> {/* Adjusted top/right slightly for better placement with toggle styles */}
+        <div className="absolute top-1 right-1 z-30"> 
           <div className="container">
             <input
               type="checkbox"
@@ -63,7 +61,7 @@ const Code = ({ id, initialIdea, setGeneratedFiles }) => {
           </div>
         </div>
 
-        {/* 🚀 Corrected: Passed the setGeneratedFiles prop down to the CodeEditor component */}
+
         <CodeEditor
           topic={userRequestForCode}
           showCode={showCode}

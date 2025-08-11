@@ -1,5 +1,3 @@
-// service/AIModel.js
-
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import "dotenv/config";
 import { CHAT_PROMPT, CODE_PROMPT } from "../data/Prompt.js";
@@ -19,11 +17,8 @@ const baseGenerationConfig = {
   maxOutputTokens: 8192,
 };
 
-// Consider trying 'gemini-1.5-pro-latest' if 'gemini-2.0-flash' struggles.
-// 1.5 Pro is generally more capable for complex code generation.
 const modelName = "gemini-2.0-flash"; // Keep as is for now, but keep this in mind.
 
-// Helper function for exponential backoff retry (No changes needed here)
 const retry = async (fn, retries = 3, delay = 1000) => {
   for (let i = 0; i < retries; i++) {
     try {

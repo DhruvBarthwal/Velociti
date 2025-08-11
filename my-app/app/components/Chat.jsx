@@ -1,74 +1,57 @@
-// Filename: Chat.jsx
-"use client"; // Assuming this component also needs client-side features for the microphone
+"use client"; 
 
-import React, { useState, useEffect, useRef, useCallback } from "react"; // Added useCallback
-import { GrSend } from "react-icons/gr"; // Assuming you have react-icons installed
-import { nanoid } from "nanoid"; // For generating unique message IDs
-import MicButton from "./MicButton"; // Import the MicButton component
-import { cn } from "@/lib/utils"; // Assuming cn utility is available for conditional class names
+import React, { useState, useEffect, useRef, useCallback } from "react"; 
+import { GrSend } from "react-icons/gr";
+import { nanoid } from "nanoid";
+import MicButton from "./MicButton"; 
+import { cn } from "@/lib/utils"; 
 
-// 🚀 NEW IMPORTS: For rendering markdown content from AI responses
 import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm'; // Plugin for GitHub Flavored Markdown (tables, task lists, etc.)
+import remarkGfm from 'remark-gfm'; 
 
 const Chat = ({ id, initialIdea, onNewUserMessageForCode }) => {
-  // State to store all chat messages
-  // Each message will be an object: { id: string, role: 'user' | 'model', text: string }
+
   const [messages, setMessages] = useState([]);
-  // State for the current user input in the textarea
   const [input, setInput] = useState("");
-  // State to indicate if the AI is currently generating a response (before typing starts)
   const [isGenerating, setIsGenerating] = useState(false);
-  // State to track if the mic is actively listening in this chat component
   const [isChatMicListening, setIsChatMicListening] = useState(false);
-  // 🚀 NEW STATE: To hold the text being typed out by the AI
   const [typingText, setTypingText] = useState("");
-  // 🚀 NEW STATE: To indicate if the AI is currently in the process of typing a response
   const [isTyping, setIsTyping] = useState(false);
 
-  // Ref for auto-scrolling to the bottom of the chat
   const messagesEndRef = useRef(null);
-  // Ref for the chat textarea to allow programmatic focusing
   const chatTextAreaRef = useRef(null);
-  // 🚀 NEW REF: To store the interval ID for typing animation for proper cleanup
   const typingIntervalRef = useRef(null);
-  // 🚀 NEW REF: To track if the initial message has been sent to prevent duplicates on re-renders
   const initialMessageSentRef = useRef(false);
 
-  // 🚀 MODIFIED: Memoized typeMessage with useCallback to ensure stability
   const typeMessage = useCallback((text) => {
-    // 🚀 FIX: Clear any existing interval before starting a new one
     if (typingIntervalRef.current) {
       clearInterval(typingIntervalRef.current);
     }
 
-    setIsTyping(true); // Start typing animation
-    setTypingText(""); // Clear previous typing text
+    setIsTyping(true); 
+    setTypingText(""); 
     let index = 0;
-    const charsPerInterval = 2; // 🚀 MODIFIED: Number of characters to type per interval
+    const charsPerInterval = 2;
 
     typingIntervalRef.current = setInterval(() => {
       if (index < text.length) {
-        // 🚀 MODIFIED: Type a chunk of characters
         setTypingText(prev => prev + text.slice(index, index + charsPerInterval));
         index += charsPerInterval;
       } else {
-        clearInterval(typingIntervalRef.current); // Stop interval when done
-        typingIntervalRef.current = null; // Clear the ref
-        setIsTyping(false); // End typing animation
-        setTypingText(""); // Clear typing text
-        // 🚀 FIX: Add the complete message to the main messages state AFTER typing is finished
+        clearInterval(typingIntervalRef.current); 
+        typingIntervalRef.current = null;
+        setIsTyping(false); 
+        setTypingText(""); 
         setMessages((prevMessages) => [
           ...prevMessages,
           { id: nanoid(), role: "model", text: text },
         ]);
       }
-    }, 5); // Adjust typing speed here (e.g., 5ms per chunk for faster typing)
-  }, []); // Empty dependency array as it only depends on setTypingText and setMessages (stable dispatch functions)
+    }, 5);
+  }, []); 
 
-  // 🚀 MODIFIED: Memoized sendMessageToAI with useCallback
   const sendMessageToAI = useCallback(async (userMessage, currentChatHistory) => {
-    setIsGenerating(true); // Indicate that AI is thinking/generating
+    setIsGenerating(true); 
     try {
       const historyForAPI = currentChatHistory.map((msg) => ({
         role: msg.role,
@@ -107,7 +90,6 @@ const Chat = ({ id, initialIdea, onNewUserMessageForCode }) => {
 
   // --- Local Storage Persistence and Initial Idea Handling ---
   useEffect(() => {
-    // 🚀 FIX: Only run this effect once on mount or when ID changes, and if not already processed
     if (initialMessageSentRef.current) return;
 
     const storedChat = localStorage.getItem(`chat-history-${id}`);
@@ -167,8 +149,6 @@ const Chat = ({ id, initialIdea, onNewUserMessageForCode }) => {
   }, [messages, id]);
 
   // --- Auto-scrolling to the latest message ---
-  // 🚀 FIX: Only scroll smoothly when a new *complete* message is added.
-  // Avoids glitching during character-by-character typing.
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
@@ -209,13 +189,11 @@ const Chat = ({ id, initialIdea, onNewUserMessageForCode }) => {
 
   // --- Event Handlers ---
   const handleSendMessage = async () => {
-    // 🚀 FIX: Disable sending if input is empty, AI is thinking, or AI is currently typing
     if (input.trim() === "" || isGenerating || isTyping) return;
 
     const userMessage = input.trim();
     const newUserMessage = { id: nanoid(), role: "user", text: userMessage };
 
-    // 🚀 FIX: Update messages state immediately with user's message
     // Use a functional update to ensure we have the very latest state for the API call
     setMessages((prevMessages) => {
       const updatedMessages = [...prevMessages, newUserMessage];
@@ -230,7 +208,6 @@ const Chat = ({ id, initialIdea, onNewUserMessageForCode }) => {
     }
   };
 
-  // 🚀 FIX: Clear typing state if user starts typing in the textarea
   const handleInputChange = (e) => {
     setInput(e.target.value);
     if (isTyping) {
@@ -252,18 +229,15 @@ const Chat = ({ id, initialIdea, onNewUserMessageForCode }) => {
   };
 
   // Determine if the send button should be enabled
-  // 🚀 FIX: Disable if AI is typing
   const isSendButtonEnabled = input.trim() !== "" && !isGenerating && !isTyping;
 
   // Determine if the microphone button should be enabled
-  // 🚀 FIX: Disable if AI is typing
   const isMicButtonEnabled = !isGenerating && !isChatMicListening && input.trim() === "" && !isTyping;
 
-  // 🚀 NEW: Custom components for ReactMarkdown to apply Tailwind styles to headings
   const MarkdownComponents = {
     h1: ({node, ...props}) => <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold mb-1 mt-1 text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400" {...props} />,
-    h2: ({node, ...props}) => <h2 className="text-2xl md:text-3xl font-bold text-blue-400" {...props} />,
-    h3: ({node, ...props}) => <h3 className="text-xl md:text-2xl font-semibold text-purple-300" {...props} />,
+    h2: ({node, ...props}) => <h2 className="text-[15px] md:text-[15px] font-bold text-blue-400" {...props} />,
+    h3: ({node, ...props}) => <h3 className="text-[15px] md:text-[15px] font-semibold text-purple-300" {...props} />,
     p: ({node, ...props}) => <p className="text-sm md:text-base leading-relaxed mb-1 text-gray-200" {...props} />,
     ol: ({node, ...props}) => <ol className="list-decimal list-inside  text-gray-300" {...props} />,
     ul: ({node, ...props}) => <ul className="list-none list-inside leading-[12px]  text-gray-300" {...props} />,

@@ -1,4 +1,3 @@
-// app/context/UserProvider.js
 'use client';
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
@@ -16,7 +15,6 @@ export const UserProvider = ({ children }) => {
       });
 
       if (!res.ok) {
-        // If the response is not OK (e.g., 401 Unauthorized, 403 Forbidden), it means no active session or an error
         console.warn('UserProvider: Auth check responded with non-OK status:', res.status, res.statusText);
         setUser(null); // Explicitly set user to null
         return; // Exit early
@@ -25,9 +23,6 @@ export const UserProvider = ({ children }) => {
       const data = await res.json();
       console.log("UserProvider: Raw response data:", data); // Add this for thorough debugging
 
-      // THIS IS THE CRITICAL PART TO VERIFY
-      // Your previous console.log "Fetched user: {_id: ...}" suggested the user object was `data` itself.
-      // If your backend responds with just the user object, then `data` is correct.
       if (data && data._id) { // Assuming _id is a reliable indicator of a user object
         setUser(data);
         console.log("UserProvider: User successfully loaded:", data);

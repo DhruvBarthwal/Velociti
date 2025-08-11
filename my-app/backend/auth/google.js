@@ -1,5 +1,3 @@
-// Filename: auth/strategies.js
-
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as GitHubStrategy } from "passport-github2";
@@ -9,10 +7,6 @@ dotenv.config();
 
 import User from "../model/user.js";
 
-// Passport session setup.
-//   To support persistent login sessions, Passport needs to be able to
-//   serialize users into and deserialize users out of the session.
-// This code is fine as-is because it deals with the Mongoose ObjectId correctly.
 passport.serializeUser((user, done) => {
   done(null, user.id);
 });

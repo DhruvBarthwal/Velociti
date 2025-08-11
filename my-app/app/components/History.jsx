@@ -27,9 +27,9 @@ const History = () => {
   }, []);
 
   return (
-    <div className="history bg-white/20 backdrop-blur-lg border border-white/30 shadow-lg p-4 h-[calc(100vh-100px)] w-[220px] rounded-2xl ml-6 text-white flex flex-col font-sans">
+    <div className="history bg-white/20 backdrop-blur-lg border border-white/30 scrollbar-hide shadow-lg p-4 h-[calc(100vh-100px)] w-[220px] rounded-2xl ml-6 text-white flex flex-col font-sans">
       <div className="mb-4 flex flex-col gap-2">
-        <h1 className="text-xs font-semibold tracking-wider mb-2 text-white/70">MAIN MENU</h1>
+        <h1 className="text-xs font-semibold tracking-wider mb-2 text-white/80">MAIN MENU</h1>
         <Link href="/" className="text-sm font-medium flex items-center gap-3 hover:text-gray-300 transition-colors">
           <IoHomeOutline /> Home
         </Link>
@@ -38,7 +38,7 @@ const History = () => {
         </Link>
       </div>
 
-      <div className="flex-grow mt-6 overflow-y-auto custom-scroll">
+      <div className="flex-grow mt-6 overflow-y-auto scrollbar-hide">
         <h1 className="text-xs font-semibold tracking-wider mb-2 text-white/70">CHATS</h1>
         {topics.length > 0 ? (
           <ul className="space-y-2">

@@ -1,4 +1,3 @@
-// Filename: /routes/authRoutes.js
 import express from 'express';
 import passport from 'passport';
 
@@ -32,7 +31,7 @@ router.get('/me', (req, res) => {
 // ✅ Step 4: Initiate GitHub authentication
 router.get("/github", passport.authenticate("github", { scope: ["user:email"] }));
 
-// ✅ Removed the redundant /github/callback route as it is defined in server.js.
+
 
 // ✅ Step 5: Logout user
 router.get("/logout", (req, res) => {

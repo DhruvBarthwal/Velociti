@@ -8,11 +8,11 @@ import { useUser } from "../context/UserProvider";
 import { useTypewriter, Cursor } from "react-simple-typewriter";
 import { motion } from "framer-motion";
 
-import MicButton from "../components/MicButton"; // Import your reusable MicButton component
+import MicButton from "../components/MicButton"; 
 
 const Hero = () => {
   const [loaded, setLoaded] = useState(false);
-  const [text, setText] = useState(""); // This state holds the textarea's content
+  const [text, setText] = useState(""); 
   const [openDialog, setOpenDialog] = useState(false);
   const [showLoader, setShowLoader] = useState(false);
   const router = useRouter();

@@ -1,4 +1,3 @@
-// Filename: server.js
 import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
@@ -6,12 +5,11 @@ import passport from "passport";
 import session from "express-session";
 import cors from "cors";
 import { Octokit } from '@octokit/rest';
-import axios from 'axios'; // We keep this as it is used for the chat functionality in the user's provided code.
+import axios from 'axios'; 
 
 // --- Import your custom modules ---
 import authRoutes from "./routes/authRoutes.js";
-// 🚨 FIX: Import the combined strategies file which contains GitHubStrategy
-import "./auth/google.js"; // Changed from "./auth/google.js"
+import "./auth/google.js"; 
 import ChatSession from "./model/ChatSession.js";
 
 // Import AI generation specific modules
