@@ -1,4 +1,4 @@
-"use client"; 
+"use client";
 
 import React, { useState, useEffect } from "react";
 import {
@@ -104,9 +104,9 @@ const CodeEditor = ({ topic, showCode }) => {
 
   if (isLoadingCode) {
     return (
-      <div className="flex-1 flex w-full items-center text-center justify-center bg-white/10 backdrop-blur-lg rounded-2xl text-white">
-        <div className="text-2xl">Generating code...</div>
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white"></div>
+      <div className="flex flex-col w-full h-full items-center text-center justify-center bg-white/10 backdrop-blur-lg rounded-2xl text-white">
+        <div className="loader1"></div>
+        <div className="text-[18px] text-white/20">Creating your template...</div>
       </div>
     );
   }
@@ -127,7 +127,6 @@ const CodeEditor = ({ topic, showCode }) => {
     );
   }
 
-  // UPDATED: Added a components folder with a placeholder to the default files
   const defaultReactTemplateFiles = {
     "/index.jsx": `import React from 'react';
 import ReactDOM from 'react-dom/client';
@@ -162,8 +161,27 @@ export default App;`,
     "react-router-dom": "^6.4.2",
     "framer-motion": "^10.0.0",
     "react-icons": "^4.7.1",
+    "react-slick": "^0.30.2",
+    "slick-carousel": "^1.8.1",
+    "@hookform/resolvers": "^3.3.4",
+    "yup": "^1.3.3",
+    "react-hook-form": "^7.51.3",
+    "swiper": "^11.1.0",
     "lucide-react": "^0.258.0",
-    "@heroicons/react": "^2.1.5"
+    "@heroicons/react": "^2.1.5",
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "tailwindcss": "^3.3.3",
+    "@headlessui/react": "^1.7.17",
+    "@radix-ui/react-icons": "^1.3.0",
+    "@radix-ui/react-tooltip": "^1.0.7",
+    "zustand": "^4.4.1",
+    "react-query": "^3.39.3",
+    "axios": "^1.5.0",
+    "d3": "^7.8.5",
+    "recharts": "^2.8.0",
+    "react-hook-form": "^7.46.1",
+    "yup": "^1.2.0"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -192,7 +210,12 @@ export default App;`,
 }`,
   };
 
-  const finalFilesForSandpack = { ...defaultReactTemplateFiles };
+  // Define an object with all image file paths and their Base64 content
+
+
+  const finalFilesForSandpack = {
+    ...defaultReactTemplateFiles,
+  };
 
   if (generatedCodeFiles) {
     if (generatedCodeFiles["/App.jsx"]) {
@@ -207,9 +230,6 @@ export default App;`,
 
     for (const filename in generatedCodeFiles) {
       if (filename !== "/App.jsx" && filename !== "/App.js") {
-        // The logic here is already pretty good, it handles file paths correctly.
-        // Just ensure it's robust enough for a new folder.
-        // This simple loop should work correctly for '/components/...' files.
         finalFilesForSandpack[filename] = generatedCodeFiles[filename];
       }
     }
@@ -236,7 +256,7 @@ export default App;`,
         >
           <SandpackLayout className="h-full w-full">
             {showCode && (
-              <div className="h-[600px] flex-shrink-0 w-[150px]">
+              <div className="h-[800px] flex-shrink-0 w-[150px]">
                 <SandpackFileExplorer className="h-full" />
               </div>
             )}
@@ -248,17 +268,17 @@ export default App;`,
               flex-1 h-full w-[200px]
             `}
             >
-              <SandpackCodeEditor className="h-[600px] " />
+              <SandpackCodeEditor className="h-[800px] " />
             </div>
 
             <div
               className={`
               transition-opacity duration-500 scrollbar-hide 
               ${!showCode ? "opacity-100 block" : "opacity-0 hidden"} 
-              h-[600px] w-full rounded-[10px] overflow-y-auto
+              h-[800px] w-full rounded-[10px] overflow-y-auto
             `}
             >
-              <SandpackPreview className=" preview scrollbar-hide  h-full " />
+              <SandpackPreview className=" preview scrollbar-hide h-full " />
             </div>
           </SandpackLayout>
         </SandpackProvider>

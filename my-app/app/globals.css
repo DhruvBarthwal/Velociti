@@ -28,8 +28,8 @@ body {
   font-family: "Mona Sans", sans-serif;
 }
 
-.header{
-  font-family: "Mona Sans", sans-serif;
+.velo{
+  font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif
 }
 
 /* From Uiverse.io by alexruix */ 
@@ -75,16 +75,7 @@ body {
 
 /* This is the crucial part that needs fixing */
 #checkbox:checked ~ .label::before {
-  /*
-   * Calculation:
-   * Label width: 50px
-   * Ball width: 15px
-   * Initial left: 5px
-   *
-   * Target left = Label width - Ball width - (initial left * 2 or some small offset)
-   * Target left = 50px - 15px - 5px = 30px
-   * Let's aim for around 28px or 30px to keep a similar gap on both sides.
-   */
+
   left: 30px; /* Adjusted to keep the ball within the bounds of the smaller label */
   background-color: #000000;
   background-image: linear-gradient(315deg, #000000 0%, #414141 70%);
@@ -113,7 +104,6 @@ body {
   transition: 0.4s;
 }
 
-/* Your .loader styles are not directly related to the toggle issue, but included for completeness. */
 .loader {
   position: relative;
   width: 50px;
@@ -124,13 +114,13 @@ body {
 .loader:before {
   content: "";
   position: absolute;
-  bottom: 30px;
-  left: 50px;
+  bottom: -23px;
+  left: -35px;
   height: 30px;
   width: 30px;
   border-radius: 50%;
   background: #2a9d8f;
-  animation: loading-bounce 0.5s ease-in-out infinite alternate;
+  animation: loading-bounce 1s ease-in-out infinite; /* Changed animation duration */
 }
 
 .loader:after {
@@ -138,7 +128,7 @@ body {
   position: absolute;
   right: 0;
   top: 0;
-  height: 7px;
+  height: 10px;
   width: 45px;
   border-radius: 4px;
   box-shadow: 0 5px 0 #f2f2f2, -35px 50px 0 #f2f2f2, -70px 95px 0 #f2f2f2;
@@ -146,20 +136,14 @@ body {
 }
 
 @keyframes loading-bounce {
-  0% {
-    transform: scale(1, 0.7);
+  0%, 100% {
+    transform: translateY(0) scale(1, 1); /* Starts and ends at the bottom */
   }
-
-  40% {
-    transform: scale(0.8, 1.2);
+  50% {
+    transform: translateY(-80px) scale(1.1, 0.9); /* Bounces up and stretches slightly */
   }
-
-  60% {
-    transform: scale(1, 1);
-  }
-
-  100% {
-    bottom: 140px;
+  80% {
+    transform: translateY(0) scale(1, 1.1); /* Returns to the bottom and squishes */
   }
 }
 
@@ -189,4 +173,39 @@ body {
 .animate-fade-in-down {
   animation: fadeInDown 0.3s ease-out;
 }
+
+/* HTML: <div class="loader"></div> */
+.loader1 {
+  width: 60px;
+  aspect-ratio: .5;
+  display: grid;
+}
+.loader1:before {
+  content: "";
+  width: 30%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  margin: auto auto 0;
+  background: #CF4647;
+  animation: l9-0 .5s cubic-bezier(0,800,1,800) infinite;
+}
+.loader1:after {
+  content: "";
+  width: 100%;
+  aspect-ratio: 1/cos(30deg);
+  margin: 0 auto auto;
+  clip-path: polygon(50% -50%,100% 50%,50% 150%,0 50%);
+  background: #524656;
+  animation: l9-1 .5s linear infinite;
+}
+@keyframes l9-0 {
+  0%,2%  {translate: 0   0%}
+  98%,to {translate: 0 -.2%}
+}
+@keyframes l9-1 {
+  0%,5%  {rotate:  0deg}
+  95%,to {rotate:-60deg}
+}
+
+
 

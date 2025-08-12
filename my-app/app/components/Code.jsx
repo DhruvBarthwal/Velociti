@@ -28,7 +28,7 @@ const Code = ({ id, initialIdea, setGeneratedFiles }) => {
   };
 
   return (
-    <div className='bg-white/10 backdrop-blur-2xl flex gap-4 p-3 h-[calc(100vh-100px)] w-full rounded-[12px] ml-6 mr-3 border border-white/30'>
+    <div className='bg-zinc-950 backdrop-blur-2xl flex gap-4 p-3 h-[calc(100vh-65px)] w-full'>
       <Chat
         id={id}
         initialIdea={initialIdea}

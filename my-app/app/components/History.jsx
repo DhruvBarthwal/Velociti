@@ -27,8 +27,8 @@ const History = () => {
   }, []);
 
   return (
-    <div className="history bg-white/20 backdrop-blur-lg border border-white/30 scrollbar-hide shadow-lg p-4 h-[calc(100vh-100px)] w-[220px] rounded-2xl ml-6 text-white flex flex-col font-sans">
-      <div className="mb-4 flex flex-col gap-2">
+    <div className="history bg-white/5  backdrop-blur-lg  scrollbar-hide shadow-lg p-4 h-[calc(100vh-65px)] w-[220px]  text-white flex flex-col font-sans">
+      <div className=" flex flex-col gap-2">
         <h1 className="text-xs font-semibold tracking-wider mb-2 text-white/80">MAIN MENU</h1>
         <Link href="/" className="text-sm font-medium flex items-center gap-3 hover:text-gray-300 transition-colors">
           <IoHomeOutline /> Home

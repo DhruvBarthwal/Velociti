@@ -104,11 +104,11 @@ export default function WorkspacePage({ params }) {
   return (
     <div className="relative h-screen w-full overflow-hidden bg-zinc-950 text-white">
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-1/2 left-[-200px] h-[600px] w-[600px] -translate-y-1/2 rounded-full bg-blue-400/20 blur-[180px]" />
-        <div className="absolute top-1/2 right-[-200px] h-[600px] w-[600px] -translate-y-1/2 rounded-full bg-purple-500/20 blur-[180px]" />
+        <div className="absolute top-[-100px] left-1/2 h-[300px] w-[80%] -translate-x-1/2 rounded-b-full bg-white/20 blur-[150px]" />
+        <div className="absolute top-[-150px] left-1/2 h-[300px] w-[60%] -translate-x-1/2 rounded-b-full bg-pink-500/30 blur-[180px]" />
       </div>
 
-      <div className="relative z-20 h-full pt-2 w-full flex flex-col">
+      <div className="relative z-20 h-full  w-full flex flex-col">
         <Header2
           isConnected={isConnected}
           setIsConnected={setIsConnected}
@@ -119,7 +119,7 @@ export default function WorkspacePage({ params }) {
           setUploadStatus={setUploadStatus}
           onConnectGithub={handleConnectGithub}
         />
-        <div className="flex-1 flex p-4">
+        <div className="flex-1 flex mt-1">
           <History topic={idea} />
           <Code
             id={id}

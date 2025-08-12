@@ -70,7 +70,7 @@ const Hero = () => {
     setTimeout(() => {
       setShowLoader(false);
       router.push(`/workspace/${id}`);
-    }, 2000);
+    }, 4000);
   };
 
   // --- Microphone Callbacks ---
@@ -88,8 +88,6 @@ const Hero = () => {
 
   const handleMicListeningChange = (listeningStatus) => {
     setIsMicListening(listeningStatus);
-    // You could optionally change placeholder here too, e.g., "Speak now..."
-    // setCurrentPlaceholder(listeningStatus ? "Speak now..." : defaultPlaceholder);
   };
 
   // NEW: Handler for when the microphone is manually stopped by the user
@@ -174,7 +172,7 @@ const Hero = () => {
           {/* Textarea Box */}
           <div
             className={`relative mt-6 w-[600px] h-[60px] bg-white rounded-[12px] py-3 pl-3 pr-3 shadow-md transition-all duration-700 ease-out ${
-              loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+              loaded ? "opacity-100 translate-y-0 " : "opacity-0 translate-y-10"
             }`}
           >
             <textarea
