@@ -171,7 +171,7 @@ const Hero = () => {
 
           {/* Textarea Box */}
           <div
-            className={`relative mt-6 w-[600px] h-[60px] bg-white rounded-[12px] py-3 pl-3 pr-3 shadow-md transition-all duration-700 ease-out ${
+            className={`relative mt-6 w-[600px] h-[100px] bg-white rounded-[12px] py-3 pl-3 pr-3 shadow-md transition-all duration-700 ease-out ${
               loaded ? "opacity-100 translate-y-0 " : "opacity-0 translate-y-10"
             }`}
           >
@@ -181,7 +181,7 @@ const Hero = () => {
               value={text}
               disabled={loading} // *** IMPORTANT: ONLY DISABLED DURING AUTH LOADING ***
               onChange={(e) => setText(e.target.value)}
-              className="w-full h-full pt-1 bg-white text-black outline-none resize-none custom-scroll placeholder:text-black placeholder:text-[17px]"
+              className="w-full h-full pt-1 pr-12 scrollbar-hide bg-white text-black outline-none resize-none custom-scroll placeholder:text-black placeholder:text-[17px]"
             />
 
             {/* Conditional rendering for Send or Microphone component */}
