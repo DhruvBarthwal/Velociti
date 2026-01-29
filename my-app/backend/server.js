@@ -7,12 +7,10 @@ import cors from "cors";
 import { Octokit } from '@octokit/rest';
 import axios from 'axios'; 
 
-// --- Import your custom modules ---
 import authRoutes from "./routes/authRoutes.js";
 import "./auth/google.js"; 
 import ChatSession from "./model/ChatSession.js";
 
-// Import AI generation specific modules
 import { generateAIResponse } from "./service/AIModel.js";
 import { CHAT_PROMPT, CODE_PROMPT } from "./data/Prompt.js";
 
@@ -21,7 +19,6 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// --- Middlewares ---
 app.use(express.json());
 app.use(
   cors({
@@ -37,7 +34,7 @@ app.use(
     saveUninitialized: false,
     cookie: {
       maxAge: 24 * 60 * 60 * 1000,
-      secure: false, // Set to true in production with HTTPS
+      secure: false,
       httpOnly: true,
       sameSite: "lax",
     },
@@ -49,7 +46,6 @@ app.use(passport.session());
 
 app.use("/auth", authRoutes);
 
-// --- Authentication Routes ---
 app.get("/auth/me", (req, res) => {
   if (req.isAuthenticated()) {
     res.json(req.user);
@@ -69,16 +65,14 @@ app.get("/auth/logout", (req, res, next) => {
   });
 });
 
-// 🚀 Corrected GitHub authentication initiation route
 app.get('/auth/github', (req, res, next) => {
     if (req.query.workspaceId) {
       req.session.workspaceId = req.query.workspaceId;
     }
-    // Ensure the 'repo' scope is requested for file upload permissions
+
     passport.authenticate('github', { scope: ['repo', 'user:email'] })(req, res, next);
 });
 
-// ✅ The crucial route that handles the redirect from GitHub.
 app.get(
   "/auth/github/callback",
   passport.authenticate("github", {
@@ -93,7 +87,6 @@ app.get(
 );
 
 
-// --- Chat Completion Route (Unchanged) ---
 app.post("/api/chat", async (req, res) => {
   try {
     const { chatHistory } = req.body;
@@ -131,7 +124,6 @@ app.post("/api/chat", async (req, res) => {
   }
 });
 
-// --- Code Generator (Frontend Only) ---
 app.post("/api/generate-code", async (req, res) => {
   try {
     const { topic } = req.body;
@@ -226,13 +218,6 @@ app.post("/api/generate-code", async (req, res) => {
       }
     }
 
-    console.log(
-      "\n--- server.js: Files after App.jsx/App.js prioritization ---"
-    );
-    console.log(JSON.stringify(filteredFiles, null, 2));
-    console.log(
-      "--- END server.js: Files after App.jsx/App.js prioritization ---\n\n"
-    );
 
     for (const filename in generatedFiles) {
       const lowerFilename = filename.toLowerCase();
@@ -247,7 +232,7 @@ app.post("/api/generate-code", async (req, res) => {
 
       if (lowerFilename.endsWith(".html") || lowerFilename.endsWith(".htm")) {
         console.warn(
-          `🗑️ server.js: Filtering out unwanted HTML file (by extension): ${filename}`
+          ` server.js: Filtering out unwanted HTML file (by extension): ${filename}`
         );
         continue;
       }
@@ -288,8 +273,8 @@ app.post("/api/generate-code", async (req, res) => {
       console.warn(
         "AI did not generate both index and App files. Providing basic React boilerplate fallback."
       );
-      const fallbackIndexContent = `import React from 'react';\nimport ReactDOM from 'react-dom/client';\nimport App from './App';\nimport './index.css';\n\nconst root = ReactDOM.createRoot(document.getElementById('root'));\nroot.render(\n  <React.StrictMode>\n    <App />\n  </React.StrictMode>\n);`;
-      const fallbackAppContent = `import React from 'react';\n\nconst App = () => {\n  return (\n    <div className="flex items-center justify-center min-h-screen bg-gray-100 text-gray-800 p-4">\n      <h1 className="text-2xl font-bold">AI Generated Content Missing or Invalid.</h1>\n      <p className="mt-2 text-lg">Please try a more specific prompt or rephrase your request.</p>\n    </div>\n  );\n};\n\nexport default App;`;
+      const fallbackIndexContent = `import React from 'react';\nimport ReactDOM from 'react-dom/client';\nimport App from './App';\nimport './index.css';\n\nconst root = ReactDOM.createRoot(document.getElementById('root'));\nroot.render(\n  <React.StrictMode>\n   <App />\n  </React.StrictMode>\n);`;
+      const fallbackAppContent = `import React from 'react';\n\nconst App = () => {\n return (\n <div className="flex items-center justify-center min-h-screen bg-gray-100 text-gray-800 p-4">\n <h1 className="text-2xl font-bold">AI Generated Content Missing or Invalid.</h1>\n   <p className="mt-2 text-lg">Please try a more specific prompt or rephrase your request.</p>\n   </div>\n );\n};\n\nexport default App;`;
       const fallbackCssContent = `@tailwind base;\n@tailwind components;\n@tailwind utilities;`;
 
       if (!hasIndexFile) {
@@ -312,7 +297,7 @@ app.post("/api/generate-code", async (req, res) => {
 
     res.json({ files: filteredFiles });
   } catch (error) {
-    console.error("❌ Backend code generation error:", error);
+    console.error(" Backend code generation error:", error);
     res
       .status(500)
       .json({ message: `Code generation failed: ${error.message}` });
@@ -320,9 +305,7 @@ app.post("/api/generate-code", async (req, res) => {
 });
 
 
-// 🚀 This is the secure backend route for uploading files to GitHub using a bot token.
 app.post('/api/upload-to-github', async (req, res) => {
-  // 🚨 CRITICAL: We now check for a server-side bot token.
   const botAccessToken = process.env.GITHUB_BOT_TOKEN;
 
   if (!botAccessToken) {
@@ -336,7 +319,6 @@ app.post('/api/upload-to-github', async (req, res) => {
   }
 
   try {
-    // Parse the repo URL to get the owner and repo name
     const urlParts = repoUrl.split('/');
     const owner = urlParts[urlParts.length - 2];
     const repo = urlParts[urlParts.length - 1].replace('.git', '');
@@ -344,14 +326,12 @@ app.post('/api/upload-to-github', async (req, res) => {
     const octokit = new Octokit({ auth: botAccessToken });
     const branch = 'main';
 
-    // 1. Get the latest commit SHA of the default branch
     const { data: { commit: { sha: latestSha } } } = await octokit.repos.getBranch({
       owner,
       repo,
       branch,
     });
 
-    // 2. Create a new tree with the files to be uploaded
     const fileBlobs = await Promise.all(
       generatedFiles.map(file => octokit.git.createBlob({
         owner,
@@ -363,7 +343,7 @@ app.post('/api/upload-to-github', async (req, res) => {
 
     const tree = fileBlobs.map((blob, index) => ({
       path: generatedFiles[index].path,
-      mode: '100644', // File mode for regular file
+      mode: '100644',
       type: 'blob',
       sha: blob.data.sha,
     }));
@@ -375,7 +355,6 @@ app.post('/api/upload-to-github', async (req, res) => {
       tree,
     });
 
-    // 3. Create a new commit
     const { data: newCommit } = await octokit.git.createCommit({
       owner,
       repo,
@@ -384,7 +363,6 @@ app.post('/api/upload-to-github', async (req, res) => {
       parents: [latestSha],
     });
 
-    // 4. Update the 'main' branch to point to the new commit
     await octokit.git.updateRef({
       owner,
       repo,
@@ -421,11 +399,11 @@ mongoose
     useUnifiedTopology: true,
   })
   .then(() => {
-    console.log("✅ MongoDB Connected");
+    console.log(" MongoDB Connected");
     app.listen(PORT, () => {
-      console.log(`🚀 Server started on http://localhost:${PORT}`);
+      console.log(` Server started on http://localhost:${PORT}`);
     });
   })
   .catch((err) => {
-    console.error("❌ MongoDB connection error:", err.message);
+    console.error("MongoDB connection error:", err.message);
   });

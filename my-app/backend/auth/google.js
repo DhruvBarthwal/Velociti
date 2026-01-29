@@ -20,7 +20,6 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
-// Use the GoogleStrategy within Passport.
 passport.use(
   new GoogleStrategy(
     {
@@ -60,7 +59,6 @@ passport.use(
   )
 );
 
-// Use the GitHubStrategy within Passport.
 passport.use(
   new GitHubStrategy(
     {
@@ -70,26 +68,21 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        // 🚨 FIX: Find the user by a dedicated 'githubId' field to avoid CastError.
         let user = await User.findOne({ githubId: profile.id });
 
         if (!user) {
-          // If a user doesn't exist, create a new one.
           user = new User({
-            githubId: profile.id, // Store the GitHub ID here
+            githubId: profile.id, 
             displayName: profile.displayName,
             username: profile.username,
-            // ✅ FIX: Save the accessToken to the user model
             accessToken: accessToken,
           });
           await user.save();
         } else {
-          // 💡 OPTIONAL: Update the accessToken if it changes
           user.accessToken = accessToken;
           await user.save();
         }
 
-        // Return the user object to Passport
         return done(null, user);
       } catch (err) {
         return done(err, null);

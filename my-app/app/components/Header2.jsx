@@ -15,7 +15,6 @@ const Header2 = ({ onConnectGithub }) => {
       </div>
 
       <div className='mr-5 flex items-center gap-4 relative'>
-        {/* Conditional rendering based on user state from the context */}
         {user? (
         <div className="flex items-center gap-6">
           <img
@@ -24,8 +23,7 @@ const Header2 = ({ onConnectGithub }) => {
             className="w-10 h-10 rounded-full"
             onError={(e) => {
               e.target.onerror = null;
-              e.target.src = "/images.png"; // Fallback to your local image
-              // Removed the console.error here as the fallback is working as intended.
+              e.target.src = "/images.png"; 
             }}
           />
           <span className="text-white font-medium">{user?.name}</span>

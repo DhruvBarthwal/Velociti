@@ -210,7 +210,6 @@ export default App;`,
 }`,
   };
 
-  // Define an object with all image file paths and their Base64 content
 
 
   const finalFilesForSandpack = {

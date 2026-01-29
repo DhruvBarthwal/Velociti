@@ -6,8 +6,8 @@ const messageSchema = new mongoose.Schema({
 });
 
 const chatSessionSchema = new mongoose.Schema({
-  userId: { type: String, default: 'anonymous' }, // default if no user logged in
+  userId: { type: String, default: 'anonymous' },
   messages: [messageSchema],
-}, { timestamps: true }); // Automatically add createdAt & updatedAt
+}, { timestamps: true }); 
 
 export default mongoose.model('ChatSession', chatSessionSchema);

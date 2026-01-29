@@ -13,7 +13,7 @@ const ProtectedRoute = ({ children }) => {
       });
       const data = await res.json();
       if (!data.user) {
-        router.replace('/'); // 👈 redirect to home page
+        router.replace('/'); 
       } else {
         setLoading(false);
       }

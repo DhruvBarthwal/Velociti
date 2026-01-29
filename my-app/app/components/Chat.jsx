@@ -48,7 +48,6 @@ const Chat = ({ id, initialIdea, onNewUserMessageForCode }) => {
       const data = await response.json();
       const aiResponseText = data.text;
 
-      // Immediately add the AI response to messages, no animation
       setMessages((prevMessages) => [
         ...prevMessages,
         { id: nanoid(), role: "model", text: aiResponseText },
@@ -56,7 +55,7 @@ const Chat = ({ id, initialIdea, onNewUserMessageForCode }) => {
     } catch (error) {
       console.error("Error sending message to AI:", error);
       const errorMessage = "Oops! I couldn't get a response right now. Please try again.";
-      // Immediately add the error message
+
       setMessages((prevMessages) => [
         ...prevMessages,
         { id: nanoid(), role: "model", text: errorMessage },
@@ -66,7 +65,6 @@ const Chat = ({ id, initialIdea, onNewUserMessageForCode }) => {
     }
   }, []);
 
-  // --- Local Storage Persistence and Initial Idea Handling ---
   useEffect(() => {
     if (initialMessageSentRef.current) return;
 
@@ -112,7 +110,6 @@ const Chat = ({ id, initialIdea, onNewUserMessageForCode }) => {
   }, [id, initialIdea, onNewUserMessageForCode, sendMessageToAI]);
 
 
-  // --- Persist messages to local storage ---
   useEffect(() => {
     if (messages.length > 0) {
       localStorage.setItem(`chat-history-${id}`, JSON.stringify(messages));
@@ -121,17 +118,16 @@ const Chat = ({ id, initialIdea, onNewUserMessageForCode }) => {
     }
   }, [messages, id]);
 
-  // --- Auto-scrolling to the latest message ---
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
 
-  // --- Microphone Callbacks for Chat Input ---
+
   const handleMicTranscriptReady = (transcript) => {
     setInput((prevInput) => prevInput + (prevInput ? " " : "") + transcript);
-    // Removed typing animation clear logic
+
     if (chatTextAreaRef.current) {
       chatTextAreaRef.current.focus();
       const value = chatTextAreaRef.current.value;
@@ -153,9 +149,8 @@ const Chat = ({ id, initialIdea, onNewUserMessageForCode }) => {
     setIsChatMicListening(false);
   };
 
-  // --- Event Handlers ---
   const handleSendMessage = async () => {
-    // Removed isTyping check
+
     if (input.trim() === "" || isGenerating) return;
 
     const userMessage = input.trim();
@@ -175,7 +170,6 @@ const Chat = ({ id, initialIdea, onNewUserMessageForCode }) => {
 
   const handleInputChange = (e) => {
     setInput(e.target.value);
-    // Removed typing animation clear logic
   };
 
   const handleKeyPress = (e) => {
@@ -185,7 +179,6 @@ const Chat = ({ id, initialIdea, onNewUserMessageForCode }) => {
     }
   };
 
-  // Removed isTyping from conditional checks
   const isSendButtonEnabled = input.trim() !== "" && !isGenerating;
   const isMicButtonEnabled = !isGenerating && !isChatMicListening && input.trim() === "";
 
@@ -278,9 +271,8 @@ const Chat = ({ id, initialIdea, onNewUserMessageForCode }) => {
           onKeyPress={handleKeyPress}
           rows={1}
           style={{ maxHeight: "100px" }}
-          disabled={isGenerating} // Simplified the disabled check
+          disabled={isGenerating} 
         />
-        {/* Conditional rendering for Send or Microphone component */}
         {input.trim() !== "" ? (
           // Send Button
           <button
@@ -296,7 +288,7 @@ const Chat = ({ id, initialIdea, onNewUserMessageForCode }) => {
             <GrSend className="size-5 text-white" />
           </button>
         ) : (
-          // Microphone Button Component
+
           <MicButton
             onTranscriptReady={handleMicTranscriptReady}
             onListeningChange={handleMicListeningChange}

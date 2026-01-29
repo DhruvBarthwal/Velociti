@@ -16,32 +16,31 @@ export const UserProvider = ({ children }) => {
 
       if (!res.ok) {
         console.warn('UserProvider: Auth check responded with non-OK status:', res.status, res.statusText);
-        setUser(null); // Explicitly set user to null
-        return; // Exit early
+        setUser(null);
+        return; 
       }
 
       const data = await res.json();
-      console.log("UserProvider: Raw response data:", data); // Add this for thorough debugging
+      console.log("UserProvider: Raw response data:", data); 
 
-      if (data && data._id) { // Assuming _id is a reliable indicator of a user object
+      if (data && data._id) { 
         setUser(data);
         console.log("UserProvider: User successfully loaded:", data);
       }
-      // If your backend nests it like { user: { _id: ... } } then use:
+  
       else if (data && data.user && data.user._id) {
         setUser(data.user);
         console.log("UserProvider: User successfully loaded (nested):", data.user);
       }
       else {
-        // If data is empty or doesn't contain a valid user structure
         setUser(null);
         console.log("UserProvider: No valid user data found in response.");
       }
     } catch (error) {
       console.error('UserProvider: Auth check failed during fetch:', error);
-      setUser(null); // On any fetch error, ensure user is null
+      setUser(null); 
     } finally {
-      setLoading(false); // Always set loading to false after the fetch attempt completes (success or failure)
+      setLoading(false); 
     }
   }, []);
 

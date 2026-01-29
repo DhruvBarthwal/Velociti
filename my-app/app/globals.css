@@ -2,11 +2,11 @@
 @import "tw-animate-css";
 
 .scrollbar-hide {
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE 10+ */
+  scrollbar-width: none;
+  -ms-overflow-style: none; 
 }
 .scrollbar-hide::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
+  display: none; 
 }
 
 @font-face {
@@ -32,12 +32,11 @@ body {
   font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif
 }
 
-/* From Uiverse.io by alexruix */ 
-/* From Uiverse.io by Yaya12085 */
+
 
 .label {
   height: 20px;
-  width: 50px; /* Label width */
+  width: 50px; 
   background-color: #fdf3f3;
   border-radius: 30px;
   -webkit-box-shadow: inset 0 0 5px 4px rgba(255, 255, 255, 1),
@@ -73,10 +72,9 @@ body {
   display: none;
 }
 
-/* This is the crucial part that needs fixing */
 #checkbox:checked ~ .label::before {
 
-  left: 30px; /* Adjusted to keep the ball within the bounds of the smaller label */
+  left: 30px; 
   background-color: #000000;
   background-image: linear-gradient(315deg, #000000 0%, #414141 70%);
   -webkit-transition: 0.4s;
@@ -86,8 +84,8 @@ body {
 .label::before {
   position: absolute;
   content: "";
-  height: 15px; /* Ball height */
-  width: 15px; /* Ball width */
+  height: 15px; 
+  width: 15px;
   border-radius: 50%;
   background-color: #000000;
   background-image: linear-gradient(
@@ -96,7 +94,7 @@ body {
     #4d4343 11%,
     #726f6f 62%
   );
-  left: 5px; /* Initial left position */
+  left: 5px;
   -webkit-box-shadow: 0 2px 1px rgba(0, 0, 0, 0.3),
     10px 10px 10px rgba(0, 0, 0, 0.3);
   box-shadow: 0 2px 1px rgba(0, 0, 0, 0.3), 10px 10px 10px rgba(0, 0, 0, 0.3);
@@ -120,7 +118,7 @@ body {
   width: 30px;
   border-radius: 50%;
   background: #2a9d8f;
-  animation: loading-bounce 1s ease-in-out infinite; /* Changed animation duration */
+  animation: loading-bounce 1s ease-in-out infinite; 
 }
 
 .loader:after {
@@ -137,13 +135,13 @@ body {
 
 @keyframes loading-bounce {
   0%, 100% {
-    transform: translateY(0) scale(1, 1); /* Starts and ends at the bottom */
+    transform: translateY(0) scale(1, 1); 
   }
   50% {
-    transform: translateY(-80px) scale(1.1, 0.9); /* Bounces up and stretches slightly */
+    transform: translateY(-80px) scale(1.1, 0.9);
   }
   80% {
-    transform: translateY(0) scale(1, 1.1); /* Returns to the bottom and squishes */
+    transform: translateY(0) scale(1, 1.1); 
   }
 }
 
@@ -174,7 +172,7 @@ body {
   animation: fadeInDown 0.3s ease-out;
 }
 
-/* HTML: <div class="loader"></div> */
+
 .loader1 {
   width: 60px;
   aspect-ratio: .5;

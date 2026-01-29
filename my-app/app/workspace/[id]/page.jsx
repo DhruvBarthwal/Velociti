@@ -54,11 +54,9 @@ export default function WorkspacePage({ params }) {
   }, []);
 
   const onUpload = async () => {
-  // If no files are generated, add a dummy one
   let filesToUpload = generatedFiles;
 
   if (!repoUrl) {
-    alert("❌ Please connect to a GitHub repo first.");
     return;
   }
 
@@ -85,14 +83,14 @@ export default function WorkspacePage({ params }) {
 
     if (response.status === 200) {
       setUploadStatus("success");
-      alert("✅ Files uploaded to GitHub!");
+      alert("Files uploaded to GitHub!");
     } else {
       throw new Error(response.data.error || 'Upload failed with an unknown error.');
     }
   } catch (err) {
     console.error(err);
     setUploadStatus("error");
-    alert(`❌ Upload failed. Details: ${err.message}`);
+    alert(` Upload failed. Details: ${err.message}`);
   }
 };
 
@@ -105,7 +103,7 @@ export default function WorkspacePage({ params }) {
     <div className="relative h-screen w-full overflow-hidden bg-zinc-950 text-white">
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
         <div className="absolute top-[-100px] left-1/2 h-[300px] w-[80%] -translate-x-1/2 rounded-b-full bg-white/20 blur-[150px]" />
-        <div className="absolute top-[-150px] left-1/2 h-[300px] w-[60%] -translate-x-1/2 rounded-b-full bg-pink-500/30 blur-[180px]" />
+       <div className="absolute top-[-150px] left-1/2 h-[300px] w-[60%] -translate-x-1/2 rounded-b-full bg-pink-500/30 blur-[180px]" />
       </div>
 
       <div className="relative z-20 h-full  w-full flex flex-col">

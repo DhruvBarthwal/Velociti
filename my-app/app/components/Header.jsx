@@ -55,8 +55,7 @@ const Header = () => {
             className="w-10 h-10 rounded-full"
             onError={(e) => {
               e.target.onerror = null;
-              e.target.src = "/images.png"; // Fallback to your local image
-              // Removed the console.error here as the fallback is working as intended.
+              e.target.src = "/images.png"; 
             }}
           />
           <span className="text-white font-medium">{user?.name}</span>

@@ -3,12 +3,10 @@ import passport from 'passport';
 
 const router = express.Router();
 
-// ✅ Step 1: Redirect user to Google for authentication
 router.get('/google', passport.authenticate('google', {
   scope: ['profile', 'email'],
 }));
 
-// ✅ Step 2: Google OAuth callback
 router.get(
   '/google/callback',
   passport.authenticate('google', {
@@ -19,7 +17,6 @@ router.get(
   }
 );
 
-// ✅ Step 3: Get current user
 router.get('/me', (req, res) => {
   if (req.user) {
     res.status(200).json(req.user);
@@ -28,12 +25,8 @@ router.get('/me', (req, res) => {
   }
 });
 
-// ✅ Step 4: Initiate GitHub authentication
 router.get("/github", passport.authenticate("github", { scope: ["user:email"] }));
 
-
-
-// ✅ Step 5: Logout user
 router.get("/logout", (req, res) => {
   req.logout(() => {
     req.session.destroy(() => {

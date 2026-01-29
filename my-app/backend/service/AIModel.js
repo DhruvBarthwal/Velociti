@@ -17,7 +17,7 @@ const baseGenerationConfig = {
   maxOutputTokens: 8192,
 };
 
-const modelName = "gemini-2.0-flash"; // Keep as is for now, but keep this in mind.
+const modelName = "gemini-2.0-flash";
 
 const retry = async (fn, retries = 3, delay = 1000) => {
   for (let i = 0; i < retries; i++) {
@@ -60,7 +60,6 @@ const retry = async (fn, retries = 3, delay = 1000) => {
   }
 };
 
-// Modified generateAIResponse
 export async function generateAIResponse(
   chatHistory,
   systemPrompt,
@@ -74,18 +73,15 @@ export async function generateAIResponse(
 
   const currentGenerationConfig = { ...baseGenerationConfig };
 
-  let contentsForAI = []; // Start with an empty array
+  let contentsForAI = []; 
 
   if (isCodeGenerationRequest) {
-    // For code requests, the 'chatHistory' will typically be just one user message
-    // containing the topic. We'll extract that topic and embed it into CODE_PROMPT.
     const userTopic = chatHistory[0]?.parts?.[0]?.text
       ?.replace("Generate React code for: ", "")
       .trim();
 
     if (userTopic) {
-      // Fill the {TOPIC} placeholder in CODE_PROMPT with the extracted user topic
-      const finalCodePrompt = CODE_PROMPT.replace("{TOPIC}", userTopic); // The entire instruction for code generation (including topic and all rules) // becomes the single user message for the model.
+      const finalCodePrompt = CODE_PROMPT.replace("{TOPIC}", userTopic); 
       contentsForAI = [{ role: "user", parts: [{ text: finalCodePrompt }] }];
       console.log(`[AIModel.js] Code generation topic: "${userTopic}"`);
     } else {
@@ -99,18 +95,16 @@ export async function generateAIResponse(
       contentsForAI = [{ role: "user", parts: [{ text: defaultCodePrompt }] }];
     }
   } else {
-    // For chat requests, `chatHistory` already contains the correct messages.
-    // We will use systemInstruction for the CHAT_PROMPT as you've done.
     contentsForAI = [...chatHistory];
   }
 
   const model = genAI.getGenerativeModel({
     model: modelName,
-    generationConfig: currentGenerationConfig, // Use systemInstruction for CHAT_PROMPT. For CODE_PROMPT, it's embedded in `contentsForAI`.
+    generationConfig: currentGenerationConfig, 
     systemInstruction: isCodeGenerationRequest
       ? undefined
       : { role: "system", parts: [{ text: systemPrompt }] },
-  }); // --- CRUCIAL DEBUGGING LOGS ---
+  }); 
 
   console.log(
     "[AIModel.js] Final contents being sent to AI:",
@@ -159,15 +153,14 @@ export async function generateAIResponse(
         throw new Error(
           `AI API responded with ${statusDetail}: Empty response for ${type}.`
         );
-      } // --- MODIFIED LOG HERE TO SHOW ENTIRE RESPONSE ---
+      } 
       console.log("\n--- START RAW AI RESPONSE FROM AIModel.js ---");
-      console.log(responseText); // Log the entire responseText
+      console.log(responseText); 
       console.log("--- END RAW AI RESPONSE FROM AIModel.js ---\n");
       return responseText;
     });
     return text;
   } catch (error) {
-    console.error("❌ AI generation failed in AIModel.js:", error);
     const errorMessage = error.status
       ? `AI generation failed (Status: ${error.status}, Message: ${error.message})`
       : `AI generation failed: ${error.message}`;
